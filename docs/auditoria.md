@@ -14,14 +14,14 @@ só troca a política de priorização (`Board.mode`).
 | R1 | Urgência é um palpite e nunca muda | Com prazo, a urgência é calculada a cada dia |
 | R2 | 4×4×4 = 64 passa na frente de 5×5×2 = 50 | Gravidade 5 com urgência 5 fura a fila |
 | R3 | Uma tarefa de dias trava dez de minutos | A nota é dividida pelo esforço |
-| R4 | 125 combinações dão só 30 notas: empates | Desempate por prazo, depois por idade |
+| R4 | Empate sem prazo fica na ordem de chegada | Desempate por prazo, depois por idade |
 | R5 | Nota baixa nunca chega ao topo | Cada semana de espera soma pontos |
 | R6 | Tarefa que depende de terceiros prende a vaga | Estado "bloqueada", com motivo |
 | R7 | Tudo o que entra acaba sendo feito | Triagem: só entra o que é importante e seu |
-| R8 | A fila cresce sem limite | Teto de tarefas abertas e descarte |
+| R8 | A fila cresce sem limite | Teto de tarefas abertas; descarte que pode ser desfeito |
 | R9 | Emergência é atendida por fora | Pausa explícita, com motivo e contagem |
 | R10 | Ninguém confere se as notas acertaram | Esforço real e veredito na conclusão; revisão semanal |
-| R11 | Tudo vira 3 (padrão) ou 5 (inflação) | Escalas descritas, sem valor pré-selecionado |
+| R11 | O 3 vem marcado e a ajuda manda usá-lo na dúvida | Escalas descritas no próprio campo, sem valor pré-selecionado |
 
 ## O que a esteira clássica já acerta
 
@@ -122,14 +122,22 @@ heurística, não um ótimo demonstrado.
 
 **Achado.** As 125 combinações de notas produzem apenas 30 valores distintos (há um teste que
 conta). Empate é a regra, não a exceção. O mesmo acontece com o número de prioridade de risco
-[3][4].
+[3][4]. A clássica já desempata pelo prazo mais próximo. Quando nenhuma das tarefas empatadas
+tem prazo, fica a ordem de chegada, e a nota nunca muda com o tempo.
 
-**Regra.** Entre prioridades iguais, vence o prazo mais próximo. Tarefa com prazo vence tarefa
-sem prazo. Persistindo o empate, vence a mais antiga.
+> **Correção.** A primeira versão desta auditoria dizia que a clássica não tinha desempate. Eu
+> ainda não tinha visto o texto de ajuda do original, que diz: "Em empate, vem antes a de prazo
+> mais próximo." A clássica foi corrigida para fazer exatamente isso, e este achado foi reescrito.
+
+**Regra.** A aprimorada mantém o desempate da clássica e o completa. Entre prioridades iguais,
+vence o prazo mais próximo. Tarefa com prazo vence tarefa sem prazo. Persistindo o empate,
+vence a mais antiga. Como a urgência é recalculada pelo prazo (R1) e a espera soma pontos (R5),
+os empates também ficam mais raros.
 
 **Fonte.** Prazo mais próximo primeiro [8].
 
 **Código e teste.** `sort_key` em `EnhancedGUT.priority` · bloco R4 de `test_enhanced_policy.py`.
+O desempate da clássica está em `ClassicGUT.priority` e em `test_classic_policy.py`.
 
 ### R5. Esperar aumenta a prioridade
 
@@ -187,14 +195,15 @@ em 1954, em que ele a atribui a "um ex-reitor" [16].
 
 **Regra.** A esteira aceita no máximo 20 tarefas abertas (na fila, em execução, pausadas ou
 bloqueadas). Cheia, recusa a nova tarefa e mantém o que foi digitado. Para abrir espaço,
-conclua ou descarte. A tarefa descartada sai da fila e fica no histórico.
+conclua ou descarte. A tarefa descartada sai da fila e vai para a lista "Descartadas", de onde
+pode ser restaurada. Por isso o descarte acontece na hora, sem pergunta de confirmação.
 
 **Fonte.** Pela lei de Little, o tempo médio que um item passa no sistema é o número médio de
 itens dividido pela taxa de saída [17]. Com a mesma capacidade de trabalho, mais tarefas abertas
 significam espera proporcionalmente maior. Limitar o trabalho em andamento é a aplicação
 prática [13].
 
-**Código e teste.** `ensure_capacity`, `Board.ensure_room`, `Task.discard` · bloco R8 de
+**Código e teste.** `ensure_capacity`, `Board.ensure_room`, `Task.discard`, `Task.restore` · bloco R8 de
 `test_enhanced_board.py`.
 
 ### R9. Pausa explícita, com motivo e contagem
@@ -230,11 +239,15 @@ a estimativa com o histórico é o corretivo.
 
 ### R11. Escalas descritas, sem valor padrão
 
-**Achado.** Com o 3 pré-selecionado, as notas se acumulam em 27. Sem descrição de cada nível,
-tudo vira 5.
+**Achado.** A clássica traz o 3 já marcado, e a própria ajuda orienta: "Na dúvida, use 3 e
+ajuste depois." As notas tendem a se acumular em 27. A ajuda descreve os níveis 5, 3 e 1 de
+cada critério, mas a descrição fica fechada em um painel, longe do campo em que a nota é
+escolhida.
 
-**Regra.** O formulário da aprimorada não sugere nota. Cada nível de cada escala diz o que
-significa, e as descrições de urgência coincidem com a tabela de prazos da R1.
+**Regra.** O formulário da aprimorada não sugere nota. Cada um dos cinco níveis de cada escala
+diz o que significa dentro do próprio campo, e as descrições de urgência coincidem com a tabela
+de prazos da R1. As descrições são curtas de propósito: cada uma cabe inteira no campo fechado
+em um celular.
 
 **Fonte.** Estimativas ficam presas a um valor inicial, mesmo arbitrário (ancoragem) [19]. A
 opção pré-selecionada tende a ser mantida: países em que a doação de órgãos é o padrão têm taxas
@@ -243,11 +256,31 @@ reduz a ambiguidade entre avaliadores [18].
 
 **Código e teste.** `ANCHORS`, `EnhancedTaskForm` · `test_anchors.py`.
 
-## Correções de interface
+## Interface
 
-Valem para as duas versões, porque eram defeitos de tela e não de método: o campo de data ganhou
-rótulo ("Prazo"), o botão "Adicionar à fila" ficou depois dos campos, e a esteira só aparece
-para quem entrou com a própria conta.
+O desenho das telas tem documento próprio: [`design.md`](../design.md). Ele vale para as duas
+versões e foi feito para leitura fácil e pouca distração, com base em orientações de
+acessibilidade cognitiva [25][26][27]. Em resumo:
+
+- **Uma família de letras** feita para que nenhum caractere se confunda com outro. Nada em
+  maiúsculas ou itálico. Texto em 17 px, com entrelinha folgada.
+- **Papel creme e tinta quase preta**, sem fundo estampado. O vermelho é a única cor de
+  destaque e marca só o que pede atenção agora: a tarefa em execução, crise, prazo vencido e
+  erro. Ele sempre vem acompanhado de palavras.
+- **Lista com fios no lugar de cartões**, tudo alinhado à esquerda, na mesma ordem em todas as
+  telas.
+- **Rótulo visível em todo campo** e palavras literais. Cada nota vem explicada em palavras
+  ("Fazer já", "Nesta semana"), como na legenda do original.
+- **Nada se move nem some sozinho.** Avisos de erro ficam até serem fechados. O formulário não
+  muda de altura quando aparece um erro. O que pode ser desfeito não pede confirmação.
+
+A clássica também recuperou o que o original tinha e a primeira reconstrução não mostrava: o
+texto de ajuda, a legenda das quatro faixas de nota e o aviso de quando a primeira da fila
+passa a ter nota maior que a tarefa em execução.
+
+Continuam valendo as três correções de tela feitas desde o início: o campo de data tem rótulo
+("Prazo"), o botão "Adicionar à fila" fica depois dos campos, e a esteira só aparece para quem
+entrou com a própria conta.
 
 Compromissos com hora marcada (aulas, reuniões) não competem por prioridade. Pertencem ao
 calendário, e a ajuda da esteira diz isso.
@@ -277,6 +310,11 @@ parâmetros para serem ajustados quando houver dados de uso.
   escritório. A direção do efeito é consistente; o tamanho no seu dia a dia pode ser outro.
 - A regra de Smith [6] e a lei de Little [17] são resultados matemáticos, válidos sob as
   hipóteses de cada modelo.
+- As orientações de interface [25][26][27] são guias de boas práticas escritos com pessoas
+  autistas, disléxicas e com outras diferenças cognitivas. Não são ensaios controlados, e essas
+  pessoas não formam um grupo com necessidades iguais. O desenho segue os pontos em que os três
+  guias concordam. A letra escolhida foi criada para baixa visão: ela torna os caracteres mais
+  distintos, mas não há prova de que melhore a leitura de pessoas disléxicas.
 
 ## Referências
 
@@ -337,3 +375,9 @@ quando a fonte consultada o trazia.
 24. Hagger, M. S., Chatzisarantis, N. L. D., Alberts, H., et al. (2016). A multilab
     preregistered replication of the ego-depletion effect. *Perspectives on Psychological
     Science, 11*(4), 546–573. <https://doi.org/10.1177/1745691616652873>
+25. W3C (2021). *Making content usable for people with cognitive and learning disabilities*.
+    W3C Working Group Note. <https://www.w3.org/TR/coga-usable/>
+26. Pun, K. (2016). *Dos and don'ts on designing for accessibility*. Accessibility in
+    government, GOV.UK. <https://accessibility.blog.gov.uk/2016/09/02/dos-and-donts-on-designing-for-accessibility/>
+27. Ako Aotearoa (2023). *Dyslexia-friendly style guide*.
+    <https://ako.ac.nz/assets/Knowledge-centre/ALNACC-Resources/Dyslexia-resources/230907-Dyslexia-Friendly-Style-Guide.pdf>
