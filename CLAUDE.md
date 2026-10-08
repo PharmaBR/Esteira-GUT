@@ -10,6 +10,9 @@ Fila pessoal de tarefas priorizada pela matriz GUT. Django + htmx, um deploy, du
   A barra global e as mensagens de falha ficam em `static/boards/js/app.js`.
   `esteira/tests/boards/test_status_indicator.py` quebra o build se uma requisição for silenciosa.
 - **Teste primeiro.** Regra nova começa por um teste em `esteira/tests/domain/`.
+- **Regra da aprimorada tem número.** R1 a R11 em `docs/auditoria.md`; o mesmo número aparece nos
+  comentários do código e dos testes. Regra nova ou alterada atualiza os três.
+- **A clássica não muda.** Ela é a linha de base para comparação; melhorias vão na aprimorada.
 - **Domínio em Python puro.** `esteira/domain/` não importa Django. As regras de negócio moram lá;
   os models (`esteira/boards/models.py`) pedem permissão ao domínio antes de mudar de estado.
 - **Active Record, sem repositórios.** Models do Django chamam o domínio direto.

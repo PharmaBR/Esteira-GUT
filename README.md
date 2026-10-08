@@ -4,13 +4,22 @@ Uma fila pessoal de tarefas ordenada pela matriz GUT (Gravidade × Urgência × 
 única tarefa em execução por vez. Funciona no celular e no computador pelo navegador e pode ser
 instalada na tela inicial.
 
-## Como funciona
+## Duas versões, lado a lado
 
-1. Cada tarefa recebe três notas de 1 a 5: **G**ravidade, **U**rgência e **T**endência.
-2. A esteira multiplica as três (máx. 125) e põe a maior nota no topo. Empates ficam na ordem de chegada.
-3. Só uma tarefa fica **em execução**. Conclua-a ou devolva-a à fila antes de puxar a próxima.
+Cada pessoa tem duas esteiras, em abas:
 
-A fila é privada: cada pessoa entra com sua conta e só enxerga a própria esteira.
+- **Clássica** — fiel à ideia original. Três notas de 1 a 5 (**G**ravidade, **U**rgência,
+  **T**endência), multiplicadas (máx. 125). A maior nota fica no topo; empates, na ordem de
+  chegada. Só uma tarefa em execução por vez.
+- **Aprimorada** — a mesma matriz, com as correções da auditoria metodológica: urgência
+  calculada pelo prazo, nota dividida pelo esforço, crises na frente, desempate, bônus por tempo
+  de espera, estados "pausada" e "bloqueada", triagem na entrada, teto de tarefas abertas e
+  revisão semanal.
+
+O porquê de cada regra, com o código, o teste e a referência científica de cada uma, está em
+[`docs/auditoria.md`](docs/auditoria.md).
+
+A fila é privada: cada pessoa entra com sua conta e só enxerga as próprias esteiras.
 
 ## Rodar no seu computador
 
@@ -58,5 +67,8 @@ esteira/
   boards/     models, views, templates e arquivos estáticos
   tests/      domain/ (regras) e boards/ (aplicação)
 ```
+
+As duas versões compartilham tudo, menos a política: `ClassicGUT` e `EnhancedGUT` em
+`esteira/domain/scoring.py`, escolhidas por `Board.mode`.
 
 Convenções do projeto: [`CLAUDE.md`](CLAUDE.md).
