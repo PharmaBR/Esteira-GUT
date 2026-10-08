@@ -1,0 +1,17 @@
+{# N1a: wordmark, the two versions, sign out. The same on every screen. #}
+<header class="masthead">
+  <h1 class="wordmark">Esteira GUT</h1>
+  {% now "l, j \d\e F" as today_label %}
+  <p class="today">{{ today_label|lower }}</p>
+  {% if boards|length > 1 %}
+  <nav class="versions" aria-label="Versões da esteira">
+    {% for item in boards %}
+    <a href="{{ item.get_absolute_url }}" class="link"{% if item.pk == board.pk and not review %} aria-current="page"{% endif %}>{{ item.name }}</a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+  <form method="post" action="{% url 'logout' %}" class="logout">
+    {% csrf_token %}
+    <button type="submit" class="link">Sair</button>
+  </form>
+</header>

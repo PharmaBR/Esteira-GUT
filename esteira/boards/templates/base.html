@@ -4,12 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}Esteira GUT{% endblock %}</title>
-  <meta name="theme-color" content="#1f5f74">
+  {# Browser chrome matches --color-paper in each scheme (values from tokens.css). #}
+  <meta name="theme-color" content="#f7f3eb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#17130e" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Esteira GUT">
   <link rel="manifest" href="{% static 'boards/manifest.webmanifest' %}">
   <link rel="icon" href="{% static 'boards/icons/icon.svg' %}" type="image/svg+xml">
   <link rel="apple-touch-icon" href="{% static 'boards/icons/icon-180.png' %}">
+  <link rel="preload" href="{% static 'boards/fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'boards/css/tokens.css' %}">
   <link rel="stylesheet" href="{% static 'boards/css/app.css' %}">
   {# 409 and 422 carry a re-rendered board (rule broken, invalid form), so they swap too. #}
   <meta name="htmx-config" content='{"includeIndicatorStyles": false, "allowEval": false, "allowScriptTags": false, "timeout": 15000, "historyCacheSize": 0, "responseHandling": [{"code": "204", "swap": false}, {"code": "[23]..", "swap": true}, {"code": "409", "swap": true}, {"code": "422", "swap": true}, {"code": "[45]..", "swap": false, "error": true}, {"code": "...", "swap": false}]}'>
@@ -17,12 +21,13 @@
   <script src="{% static 'boards/js/app.js' %}" defer></script>
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <a class="skip" href="#conteudo">Pular para o conteúdo</a>
   {# Global request status: every htmx request and page navigation drives this bar. #}
   <div id="progress" class="progress" aria-hidden="true"></div>
   <div id="request-status" class="sr-only" role="status" aria-live="polite"></div>
   <div id="request-error" class="toast" role="alert" hidden>
-    <span id="request-error-text"></span>
-    <button type="button" id="request-error-close" class="toast-close" aria-label="Fechar aviso">&times;</button>
+    <p class="toast-text" id="request-error-text"></p>
+    <button type="button" id="request-error-close" class="link">Fechar</button>
   </div>
   {% block body %}{% endblock %}
 </body>

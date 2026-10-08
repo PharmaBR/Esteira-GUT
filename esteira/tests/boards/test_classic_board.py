@@ -71,7 +71,7 @@ def test_returning_a_task_puts_it_back_in_the_queue(classic, add_task):
     add_task(classic, "a")
     task = classic.pull_next(timezone.now())
 
-    task.return_to_queue()
+    task.return_to_queue(timezone.now())
 
     assert classic.running_task() is None
     assert [item.task for item in classic.ranked_queue(timezone.now())] == [task]

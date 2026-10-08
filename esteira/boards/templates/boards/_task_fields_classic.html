@@ -1,0 +1,12 @@
+{# The original's fields: a title, three ratings preset to 3, a category, a date. #}
+{% if form.non_field_errors %}<p class="field-error" role="alert"><span class="mark" aria-hidden="true"></span>{{ form.non_field_errors|join:" " }}</p>{% endif %}
+{% include "boards/_field.html" with field=form.title %}
+<div class="field-trio">
+  {% for field in form.rating_fields %}
+  {% include "boards/_field.html" %}
+  {% endfor %}
+</div>
+<div class="field-pair">
+  {% include "boards/_field.html" with field=form.category %}
+  {% include "boards/_field.html" with field=form.due_date %}
+</div>

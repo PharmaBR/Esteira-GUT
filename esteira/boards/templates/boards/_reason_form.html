@@ -1,0 +1,18 @@
+{# A state change that must say why. Parameters: url, label, question, kind, task. #}
+<details class="reason"{% if reason_error.kind == kind and reason_error.task == task.pk %} open{% endif %}>
+  <summary>{{ label }}…</summary>
+  <form method="post" action="{{ url }}" class="reason-form" novalidate
+        hx-post="{{ url }}" hx-target="#board" hx-swap="outerHTML"
+        hx-indicator="this" hx-disabled-elt="find button">
+    {% csrf_token %}
+    <div class="field">
+      <label for="reason-{{ kind }}-{{ task.pk }}">{{ question }}</label>
+      <input type="text" name="reason" id="reason-{{ kind }}-{{ task.pk }}" maxlength="200" autocomplete="off"
+             aria-describedby="reason-{{ kind }}-{{ task.pk }}-note"{% if reason_error.kind == kind and reason_error.task == task.pk %} aria-invalid="true"{% endif %}>
+      <p class="field-note{% if reason_error.kind == kind and reason_error.task == task.pk %} field-error{% endif %}" id="reason-{{ kind }}-{{ task.pk }}-note">{% if reason_error.kind == kind and reason_error.task == task.pk %}<span class="mark" aria-hidden="true"></span>{{ reason_error.message }}{% endif %}</p>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn">{{ label }} tarefa<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+    </div>
+  </form>
+</details>

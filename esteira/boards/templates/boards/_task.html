@@ -1,19 +1,36 @@
-<li class="card task" id="task-{{ task.pk }}">
-  <div class="score" title="Nota GUT"><span class="sr-only">Nota </span>{{ priority.score }}</div>
-  <div class="task-body">
-    <h3 class="task-title">{{ task.title }}</h3>
+<li class="task" id="task-{{ task.pk }}">
+  <p class="figure" title="{% if board.is_enhanced %}Prioridade{% else %}Nota GUT{% endif %}"><span class="sr-only">{% if board.is_enhanced %}Prioridade{% else %}Nota{% endif %} </span>{% if priority.score >= 100 %}{{ priority.score|floatformat:"0" }}{% else %}{{ priority.score|floatformat:"-1" }}{% endif %}</p>
+  <div class="row-body">
+    <h3 class="row-title">{{ task.title }}</h3>
+    {% if first or priority.crisis %}
+    <p class="meta">
+      {% if priority.crisis %}<span class="late"><span class="mark" aria-hidden="true"></span>Crise</span>{% endif %}
+      {% if first %}<span class="tag">Próxima da fila</span>{% endif %}
+    </p>
+    {% endif %}
     {% include "boards/_task_meta.html" %}
-    <div class="task-actions">
-      <a class="link-button" href="{% url 'task-edit' task.pk %}"
+    <div class="row-actions">
+      <a class="link" href="{% url 'task-edit' task.pk %}"
          hx-get="{% url 'task-edit' task.pk %}" hx-target="#task-{{ task.pk }}" hx-swap="outerHTML"
          hx-indicator="this" hx-disabled-elt="this">Editar<span class="spinner htmx-indicator" aria-hidden="true"></span></a>
-      <form method="post" action="{% url 'task-delete' task.pk %}"
-            hx-post="{% url 'task-delete' task.pk %}" hx-target="#board" hx-swap="outerHTML"
-            hx-confirm="Excluir “{{ task.title }}”?"
+      {% if board.is_enhanced %}
+      <form method="post" action="{% url 'task-discard' task.pk %}"
+            hx-post="{% url 'task-discard' task.pk %}" hx-target="#board" hx-swap="outerHTML"
             hx-indicator="this" hx-disabled-elt="find button">
         {% csrf_token %}
-        <button type="submit" class="link-button danger">Excluir<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+        <button type="submit" class="link">Descartar<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
       </form>
+      {% url 'task-block' task.pk as block_url %}
+      {% include "boards/_reason_form.html" with url=block_url label="Bloquear" question="Está esperando o quê, ou quem?" kind="block" %}
+      {% else %}
+      <form method="post" action="{% url 'task-delete' task.pk %}"
+            hx-post="{% url 'task-delete' task.pk %}" hx-target="#board" hx-swap="outerHTML"
+            hx-confirm="Excluir “{{ task.title }}”? Não dá para desfazer."
+            hx-indicator="this" hx-disabled-elt="find button">
+        {% csrf_token %}
+        <button type="submit" class="link">Excluir<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+      </form>
+      {% endif %}
     </div>
   </div>
 </li>

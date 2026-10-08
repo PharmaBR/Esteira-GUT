@@ -3,31 +3,17 @@
 
 {% block body %}
 <div class="page">
-  <header class="masthead">
-    <div class="masthead-top">
-      <h1>Esteira GUT</h1>
-      <form method="post" action="{% url 'logout' %}" class="logout">
-        {% csrf_token %}
-        <button type="submit" class="link-button">Sair</button>
-      </form>
-    </div>
-    {% now "l, j \d\e F" as today_label %}
-    <p class="date">{{ today_label|lower }}</p>
-    <p class="tagline">Sua fila é privada · GUT = Gravidade × Urgência × Tendência · máx. 125</p>
-    {% if boards|length > 1 %}
-    <nav class="tabs" aria-label="Versões da esteira">
-      {% for item in boards %}
-      <a href="{{ item.get_absolute_url }}" class="tab"{% if item.pk == board.pk %} aria-current="page"{% endif %}>{{ item.name }}</a>
-      {% endfor %}
-    </nav>
-    {% endif %}
-  </header>
+  {% include "boards/_masthead.html" %}
 
-  <details class="card help">
-    <summary>Como usar a esteira (matriz GUT)</summary>
-    {% include "boards/_help.html" %}
-  </details>
+  <main id="conteudo" tabindex="-1">
+    <details class="disclosure help">
+      <summary>Como usar a esteira</summary>
+      {% include "boards/_help.html" %}
+    </details>
 
-  {% include "boards/_board.html" %}
+    {% include "boards/_board.html" %}
+  </main>
+
+  {% include "boards/_footer.html" %}
 </div>
 {% endblock %}

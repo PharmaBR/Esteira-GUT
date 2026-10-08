@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Revisão semanal · Esteira GUT{% endblock %}
+
+{# Stat-Led: the figures are real counts from this esteira, never placeholders. #}
+{% block body %}
+<div class="page">
+  {% include "boards/_masthead.html" %}
+
+  <main id="conteudo" tabindex="-1">
+  <section class="section" aria-labelledby="h-review">
+    <div class="section-head">
+      <h2 id="h-review" class="section-title">Revisão semanal</h2>
+      <a class="link" href="{{ board.get_absolute_url }}">Voltar para a esteira</a>
+    </div>
+    <p class="hint">Dez minutos, uma vez por semana, para conferir se as notas e as estimativas estão corretas.</p>
+
+    <div class="lead">
+      <p class="lead-figure">{{ review.done_this_week }}</p>
+      <h3 class="lead-title">tarefa{{ review.done_this_week|pluralize }} concluída{{ review.done_this_week|pluralize }} nos últimos 7 dias</h3>
+    </div>
+  </section>
+
+  <div class="review">
+    <section class="section spec" aria-labelledby="h-load">
+      <div class="section-head"><h2 id="h-load" class="section-title">Carga</h2></div>
+      <ul class="rows">
+        <li class="split"><span>Tarefas abertas</span><span class="value">{{ review.open_count }} de {{ board.queue_limit }}</span></li>
+        <li class="split"><span>Interrupções<small>Pausas nas tarefas abertas e nas concluídas em 7 dias</small></span><span class="value">{{ review.interruptions }}</span></li>
+      </ul>
+    </section>
+
+    <section class="section spec" aria-labelledby="h-estimates">
+      <div class="section-head"><h2 id="h-estimates" class="section-title">Suas estimativas</h2></div>
+      {% if review.accuracy.total %}
+      <ul class="rows">
+        <li class="split"><span>Levou o tempo estimado</span><span class="value">{{ review.accuracy.on_target }}</span></li>
+        <li class="split"><span>Levou mais que o estimado</span><span class="value">{{ review.accuracy.underestimated }}</span></li>
+        <li class="split"><span>Levou menos que o estimado</span><span class="value">{{ review.accuracy.overestimated }}</span></li>
+      </ul>
+      <p class="hint">De {{ review.accuracy.total }} tarefa{{ review.accuracy.total|pluralize }} concluída{{ review.accuracy.total|pluralize }} em 30 dias. Se a maioria levou mais, escolha um tamanho acima ao estimar.</p>
+      {% else %}
+      <p class="empty">Nenhuma tarefa com estimativa foi concluída nos últimos 30 dias.</p>
+      {% endif %}
+    </section>
+
+    <section class="section spec" aria-labelledby="h-verdicts">
+      <div class="section-head"><h2 id="h-verdicts" class="section-title">A prioridade estava certa?</h2></div>
+      <ul class="rows">
+        {% for label, total in review.verdict_rows %}
+        <li class="split"><span>{{ label }}</span><span class="value">{{ total }}</span></li>
+        {% endfor %}
+      </ul>
+      <p class="hint">Se muitas deveriam ter vindo antes, dê notas maiores de gravidade ou tendência a esse tipo de tarefa.</p>
+    </section>
+
+    <section class="section spec" aria-labelledby="h-stale">
+      <div class="section-head"><h2 id="h-stale" class="section-title">Paradas há {{ stale_weeks }} semanas ou mais</h2></div>
+      {% if review.stale %}
+      <ul class="rows">
+        {% for item in review.stale %}
+        <li class="split"><span>{{ item.task.title }}</span><span class="value">{{ item.priority.weeks_waiting }} semanas</span></li>
+        {% endfor %}
+      </ul>
+      <p class="hint">Para cada uma: ainda é importante? Se não for, descarte na esteira.</p>
+      {% else %}
+      <p class="empty">Nenhuma tarefa está parada na fila.</p>
+      {% endif %}
+    </section>
+
+    <section class="section spec" aria-labelledby="h-waiting">
+      <div class="section-head"><h2 id="h-waiting" class="section-title">Bloqueadas e pausadas</h2></div>
+      {% if review.blocked or review.paused %}
+      <ul class="rows">
+        {% for task in review.blocked %}
+        <li><span>{{ task.title }}<small>Bloqueada. Motivo: {{ task.status_reason }}</small></span></li>
+        {% endfor %}
+        {% for task in review.paused %}
+        <li><span>{{ task.title }}<small>Pausada. Motivo: {{ task.status_reason }}</small></span></li>
+        {% endfor %}
+      </ul>
+      <p class="hint">O motivo ainda vale? Cobre a resposta de quem falta ou desbloqueie.</p>
+      {% else %}
+      <p class="empty">Nenhuma tarefa está bloqueada ou pausada.</p>
+      {% endif %}
+    </section>
+  </div>
+  </main>
+
+  {% include "boards/_footer.html" %}
+</div>
+{% endblock %}

@@ -4,13 +4,33 @@ Uma fila pessoal de tarefas ordenada pela matriz GUT (Gravidade × Urgência × 
 única tarefa em execução por vez. Funciona no celular e no computador pelo navegador e pode ser
 instalada na tela inicial.
 
-## Como funciona
+## Duas versões, lado a lado
 
-1. Cada tarefa recebe três notas de 1 a 5: **G**ravidade, **U**rgência e **T**endência.
-2. A esteira multiplica as três (máx. 125) e põe a maior nota no topo. Empates ficam na ordem de chegada.
-3. Só uma tarefa fica **em execução**. Conclua-a ou devolva-a à fila antes de puxar a próxima.
+Cada pessoa tem duas esteiras, em abas:
 
-A fila é privada: cada pessoa entra com sua conta e só enxerga a própria esteira.
+- **Clássica** — fiel à ideia original. Três notas de 1 a 5 (**G**ravidade, **U**rgência,
+  **T**endência), multiplicadas (máx. 125). A maior nota fica no topo; empates, pelo prazo mais
+  próximo. Cada nota cai em uma faixa: fazer já (75 ou mais), nesta semana (40 a 74), agendar
+  (20 a 39) e quando sobrar tempo. Só uma tarefa em execução por vez.
+- **Aprimorada** — a mesma matriz, com as correções da auditoria metodológica: urgência
+  calculada pelo prazo, nota dividida pelo esforço, crises na frente, desempate, bônus por tempo
+  de espera, estados "pausada" e "bloqueada", triagem na entrada, teto de tarefas abertas e
+  revisão semanal.
+
+O porquê de cada regra, com o código, o teste e a referência científica de cada uma, está em
+[`docs/auditoria.md`](docs/auditoria.md).
+
+A fila é privada: cada pessoa entra com sua conta e só enxerga as próprias esteiras.
+
+## Visual
+
+A interface foi desenhada para ser calma e fácil de ler, com atenção a quem é neurodivergente: uma
+família tipográfica de alta legibilidade, papel creme, fios em vez de caixas, um único vermelho
+para o que precisa de você agora, rótulos sempre visíveis e nada que se mexa ou suma sozinho. As
+regras e os motivos estão em [`design.md`](design.md).
+
+As fontes Atkinson Hyperlegible Next e Mono (Braille Institute, licença SIL OFL 1.1) são servidas
+pela própria aplicação; as licenças estão em `esteira/boards/static/boards/fonts/`.
 
 ## Rodar no seu computador
 
@@ -59,4 +79,7 @@ esteira/
   tests/      domain/ (regras) e boards/ (aplicação)
 ```
 
-Convenções do projeto: [`CLAUDE.md`](CLAUDE.md).
+As duas versões compartilham tudo, menos a política: `ClassicGUT` e `EnhancedGUT` em
+`esteira/domain/scoring.py`, escolhidas por `Board.mode`.
+
+Convenções do projeto: [`CLAUDE.md`](CLAUDE.md). Sistema visual: [`design.md`](design.md).

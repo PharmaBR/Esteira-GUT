@@ -31,6 +31,11 @@ def classic(user):
 
 
 @pytest.fixture
+def enhanced(user):
+    return Board.objects.create(owner=user, name="Aprimorada", mode=Board.Mode.ENHANCED)
+
+
+@pytest.fixture
 def add_task():
     """Create tasks spaced a minute apart, so arrival order is unambiguous."""
     counter = {"n": 0}
