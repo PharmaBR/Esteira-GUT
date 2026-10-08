@@ -1,0 +1,29 @@
+{% load static %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}Esteira GUT{% endblock %}</title>
+  <meta name="theme-color" content="#1f5f74">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Esteira GUT">
+  <link rel="manifest" href="{% static 'boards/manifest.webmanifest' %}">
+  <link rel="icon" href="{% static 'boards/icons/icon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'boards/icons/icon-180.png' %}">
+  <link rel="stylesheet" href="{% static 'boards/css/app.css' %}">
+  {# 409 and 422 carry a re-rendered board (rule broken, invalid form), so they swap too. #}
+  <meta name="htmx-config" content='{"includeIndicatorStyles": false, "allowEval": false, "allowScriptTags": false, "timeout": 15000, "historyCacheSize": 0, "responseHandling": [{"code": "204", "swap": false}, {"code": "[23]..", "swap": true}, {"code": "409", "swap": true}, {"code": "422", "swap": true}, {"code": "[45]..", "swap": false, "error": true}, {"code": "...", "swap": false}]}'>
+  <script src="{% static 'boards/js/htmx-2.0.11.min.js' %}" defer></script>
+  <script src="{% static 'boards/js/app.js' %}" defer></script>
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {# Global request status: every htmx request and page navigation drives this bar. #}
+  <div id="progress" class="progress" aria-hidden="true"></div>
+  <div id="request-status" class="sr-only" role="status" aria-live="polite"></div>
+  <div id="request-error" class="toast" role="alert" hidden>
+    <span id="request-error-text"></span>
+    <button type="button" id="request-error-close" class="toast-close" aria-label="Fechar aviso">&times;</button>
+  </div>
+  {% block body %}{% endblock %}
+</body>
+</html>

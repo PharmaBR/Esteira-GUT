@@ -1,0 +1,19 @@
+<li class="card task" id="task-{{ task.pk }}">
+  <div class="score" title="Nota GUT"><span class="sr-only">Nota </span>{{ priority.score }}</div>
+  <div class="task-body">
+    <h3 class="task-title">{{ task.title }}</h3>
+    {% include "boards/_task_meta.html" %}
+    <div class="task-actions">
+      <a class="link-button" href="{% url 'task-edit' task.pk %}"
+         hx-get="{% url 'task-edit' task.pk %}" hx-target="#task-{{ task.pk }}" hx-swap="outerHTML"
+         hx-indicator="this" hx-disabled-elt="this">Editar<span class="spinner htmx-indicator" aria-hidden="true"></span></a>
+      <form method="post" action="{% url 'task-delete' task.pk %}"
+            hx-post="{% url 'task-delete' task.pk %}" hx-target="#board" hx-swap="outerHTML"
+            hx-confirm="Excluir “{{ task.title }}”?"
+            hx-indicator="this" hx-disabled-elt="find button">
+        {% csrf_token %}
+        <button type="submit" class="link-button danger">Excluir<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+      </form>
+    </div>
+  </div>
+</li>

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Editar tarefa · Esteira GUT{% endblock %}
+
+{# Full-page fallback for the edit form when JavaScript is unavailable. #}
+{% block body %}
+<div class="page page-narrow">
+  <header class="masthead"><h1>Editar tarefa</h1></header>
+  <ul class="queue">{% include "boards/_task_edit.html" %}</ul>
+</div>
+{% endblock %}

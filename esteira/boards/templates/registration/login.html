@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Entrar · Esteira GUT{% endblock %}
+
+{% block body %}
+<div class="page page-narrow">
+  <header class="masthead">
+    <h1>Esteira GUT</h1>
+    <p class="tagline">Sua fila é privada · entre para usar sua esteira</p>
+  </header>
+  <form method="post" class="card task-form">
+    {% csrf_token %}
+    {% if form.errors %}<p class="field-error" role="alert">Usuário ou senha incorretos.</p>{% endif %}
+    <div class="field">
+      <label for="{{ form.username.id_for_label }}">Usuário</label>
+      {{ form.username }}
+    </div>
+    <div class="field">
+      <label for="{{ form.password.id_for_label }}">Senha</label>
+      {{ form.password }}
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn btn-primary btn-block">Entrar<span class="spinner" aria-hidden="true"></span></button>
+  </form>
+</div>
+{% endblock %}

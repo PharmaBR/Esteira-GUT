@@ -1,0 +1,86 @@
+{# The live region of the page: every action answers with this whole block. #}
+<div id="board" class="board" data-mode="{{ board.mode }}">
+  {% if error %}<p class="alert" role="alert">{{ error }}</p>{% endif %}
+
+  <div class="col col-now">
+    <section aria-labelledby="h-running">
+      <h2 id="h-running" class="eyebrow">Em execução</h2>
+      {% if running %}
+      <article class="card running">
+        <h3 class="running-title">{{ running.title }}</h3>
+        {% include "boards/_task_meta.html" with task=running %}
+        <div class="actions">
+          <form method="post" action="{% url 'task-complete' running.pk %}"
+                hx-post="{% url 'task-complete' running.pk %}" hx-target="#board" hx-swap="outerHTML"
+                hx-indicator="this" hx-disabled-elt="find button">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Concluir<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+          </form>
+          <form method="post" action="{% url 'task-return' running.pk %}"
+                hx-post="{% url 'task-return' running.pk %}" hx-target="#board" hx-swap="outerHTML"
+                hx-indicator="this" hx-disabled-elt="find button">
+            {% csrf_token %}
+            <button type="submit" class="btn">Devolver à fila<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+          </form>
+        </div>
+      </article>
+      {% else %}
+      <div class="card slot-empty">
+        {% if next_up %}
+        <p class="slot-empty-title">Nada em execução.</p>
+        <form method="post" action="{% url 'pull-next' board.pk %}"
+              hx-post="{% url 'pull-next' board.pk %}" hx-target="#board" hx-swap="outerHTML"
+              hx-indicator="this" hx-disabled-elt="find button">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-block">Puxar a próxima<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+        </form>
+        <p class="hint">Próxima da fila: {{ next_up.task.title }}</p>
+        {% else %}
+        <p class="slot-empty-title">Nada em execução.</p>
+        <p class="hint">Adicione uma tarefa para começar.</p>
+        {% endif %}
+      </div>
+      {% endif %}
+    </section>
+
+    <section aria-labelledby="h-new">
+      <h2 id="h-new" class="eyebrow">Nova tarefa</h2>
+      <form method="post" action="{% url 'task-create' board.pk %}" class="card task-form" novalidate
+            hx-post="{% url 'task-create' board.pk %}" hx-target="#board" hx-swap="outerHTML"
+            hx-indicator="this" hx-disabled-elt="find button">
+        {% csrf_token %}
+        {% include "boards/_task_fields.html" %}
+        <button type="submit" class="btn btn-primary btn-block">Adicionar à fila<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+      </form>
+    </section>
+  </div>
+
+  <div class="col col-queue">
+    <section aria-labelledby="h-queue">
+      <h2 id="h-queue" class="eyebrow">Fila{% if queue %} <span class="count">{{ queue|length }}</span>{% endif %}</h2>
+      {% if queue %}
+      <ol class="queue">
+        {% for item in queue %}
+        {% include "boards/_task.html" with task=item.task priority=item.priority position=forloop.counter %}
+        {% endfor %}
+      </ol>
+      {% else %}
+      <p class="empty">A fila está vazia.</p>
+      {% endif %}
+    </section>
+
+    <details id="done" class="done" data-keep-open>
+      <summary>Concluídas{% if done_count %} ({{ done_count }}){% endif %}</summary>
+      {% if done %}
+      <ul class="done-list">
+        {% for task in done %}
+        <li><span class="done-title">{{ task.title }}</span> <time datetime="{{ task.completed_at|date:'c' }}">{{ task.completed_at|date:"j/m H:i" }}</time></li>
+        {% endfor %}
+      </ul>
+      {% if done_count > done|length %}<p class="hint">Mostrando as {{ done|length }} mais recentes.</p>{% endif %}
+      {% else %}
+      <p class="empty">Nenhuma tarefa concluída ainda.</p>
+      {% endif %}
+    </details>
+  </div>
+</div>

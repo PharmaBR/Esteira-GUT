@@ -1,0 +1,5 @@
+<p class="meta">
+  <span class="gut">G{{ task.gravity }} · U{{ task.urgency }} · T{{ task.trend }}</span>
+  <span>{{ task.get_category_display }}</span>
+  {% if task.due_date %}<span>prazo {{ task.due_date|date:"j/m" }}</span>{% endif %}
+</p>
