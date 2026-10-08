@@ -1,0 +1,50 @@
+# Production on a bare VPS: Caddy (HTTPS) -> app -> Postgres.
+# Self-contained on purpose: panels that take only this file (Hostinger Docker Manager, Portainer)
+# can run it, because the app is built straight from the Git repository.
+# Point the domain's DNS A record at the VPS before the first start, so Caddy can get a certificate.
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    command: caddy reverse-proxy --from ${DOMAIN:?set DOMAIN} --to web:8000
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+  web:
+    build: ${ESTEIRA_SOURCE:-https://github.com/PharmaBR/Esteira-GUT.git#main}
+    restart: unless-stopped
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DOMAIN}
+      DJANGO_CSRF_TRUSTED_ORIGINS: https://${DOMAIN}
+      DATABASE_URL: postgres://esteira:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/esteira
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: esteira
+      POSTGRES_USER: esteira
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U esteira -d esteira"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pgdata:
