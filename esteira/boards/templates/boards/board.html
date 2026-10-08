@@ -5,11 +5,15 @@
 <div class="page">
   {% include "boards/_masthead.html" %}
 
-  <details class="card help">
-    <summary>Como usar a esteira (matriz GUT)</summary>
-    {% include "boards/_help.html" %}
-  </details>
+  <main id="conteudo" tabindex="-1">
+    <details class="disclosure help">
+      <summary>Como usar a esteira</summary>
+      {% include "boards/_help.html" %}
+    </details>
 
-  {% include "boards/_board.html" %}
+    {% include "boards/_board.html" %}
+  </main>
+
+  {% include "boards/_footer.html" %}
 </div>
 {% endblock %}

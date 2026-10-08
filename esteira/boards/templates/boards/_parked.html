@@ -1,25 +1,28 @@
-{# A paused or blocked task: out of the queue, with the reason it is there. #}
-<li class="card parked" id="task-{{ task.pk }}">
-  <h3 class="task-title">{{ task.title }}</h3>
-  <p class="reason-text">{{ task.status_reason }}</p>
-  {% include "boards/_task_meta.html" %}
-  <div class="task-actions">
-    <form method="post" action="{{ back_url }}"
-          hx-post="{{ back_url }}" hx-target="#board" hx-swap="outerHTML"
-          hx-indicator="this" hx-disabled-elt="find button">
-      {% csrf_token %}
-      <button type="submit" class="link-button">{{ back_label }}<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
-    </form>
-    <form method="post" action="{% url 'task-discard' task.pk %}"
-          hx-post="{% url 'task-discard' task.pk %}" hx-target="#board" hx-swap="outerHTML"
-          hx-confirm="Descartar “{{ task.title }}”? Ela sai da esteira e fica no histórico."
-          hx-indicator="this" hx-disabled-elt="find button">
-      {% csrf_token %}
-      <button type="submit" class="link-button danger">Descartar<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
-    </form>
-    {% if can_block %}
-    {% url 'task-block' task.pk as block_url %}
-    {% include "boards/_reason_form.html" with url=block_url label="Bloquear" placeholder="Está esperando o quê, ou quem?" kind="block" %}
-    {% endif %}
+{# A paused, blocked or discarded task: out of the queue, with the way back. #}
+<li id="task-{{ task.pk }}">
+  <div class="row-body">
+    <h3 class="row-title">{{ task.title }}</h3>
+    {% if task.status_reason %}<p>Motivo: {{ task.status_reason }}</p>{% endif %}
+    {% include "boards/_task_meta.html" %}
+    <div class="row-actions">
+      <form method="post" action="{{ back_url }}"
+            hx-post="{{ back_url }}" hx-target="#board" hx-swap="outerHTML"
+            hx-indicator="this" hx-disabled-elt="find button">
+        {% csrf_token %}
+        <button type="submit" class="link">{{ back_label }}<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+      </form>
+      {% if can_discard %}
+      <form method="post" action="{% url 'task-discard' task.pk %}"
+            hx-post="{% url 'task-discard' task.pk %}" hx-target="#board" hx-swap="outerHTML"
+            hx-indicator="this" hx-disabled-elt="find button">
+        {% csrf_token %}
+        <button type="submit" class="link">Descartar<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+      </form>
+      {% endif %}
+      {% if can_block %}
+      {% url 'task-block' task.pk as block_url %}
+      {% include "boards/_reason_form.html" with url=block_url label="Bloquear" question="Está esperando o quê, ou quem?" kind="block" %}
+      {% endif %}
+    </div>
   </div>
 </li>

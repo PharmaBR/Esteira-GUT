@@ -4,7 +4,12 @@
 {# Full-page fallback for the edit form when JavaScript is unavailable. #}
 {% block body %}
 <div class="page page-narrow">
-  <header class="masthead"><h1>Editar tarefa</h1></header>
-  <ul class="queue">{% include "boards/_task_edit.html" %}</ul>
+  <header class="masthead"><h1 class="wordmark">Esteira GUT</h1></header>
+  <main id="conteudo" tabindex="-1">
+    <section class="section">
+      <div class="section-head"><h2 class="section-title">Editar tarefa</h2></div>
+      <ul class="rows">{% include "boards/_task_edit.html" %}</ul>
+    </section>
+  </main>
 </div>
 {% endblock %}

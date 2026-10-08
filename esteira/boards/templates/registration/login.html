@@ -4,22 +4,29 @@
 {% block body %}
 <div class="page page-narrow">
   <header class="masthead">
-    <h1>Esteira GUT</h1>
-    <p class="tagline">Sua fila é privada · entre para usar sua esteira</p>
+    <h1 class="wordmark">Esteira GUT</h1>
   </header>
-  <form method="post" class="card task-form">
-    {% csrf_token %}
-    {% if form.errors %}<p class="field-error" role="alert">Usuário ou senha incorretos.</p>{% endif %}
-    <div class="field">
-      <label for="{{ form.username.id_for_label }}">Usuário</label>
-      {{ form.username }}
-    </div>
-    <div class="field">
-      <label for="{{ form.password.id_for_label }}">Senha</label>
-      {{ form.password }}
-    </div>
-    <input type="hidden" name="next" value="{{ next }}">
-    <button type="submit" class="btn btn-primary btn-block">Entrar<span class="spinner" aria-hidden="true"></span></button>
-  </form>
+  <main id="conteudo" tabindex="-1">
+    <section class="section">
+      <div class="section-head"><h2 class="section-title">Entrar</h2></div>
+      <form method="post" class="form" novalidate>
+        {% csrf_token %}
+        <div class="field">
+          <label for="{{ form.username.id_for_label }}">Usuário</label>
+          {{ form.username }}
+          <p class="field-note"></p>
+        </div>
+        <div class="field">
+          <label for="{{ form.password.id_for_label }}">Senha</label>
+          {{ form.password }}
+          {# The answer never says which of the two was wrong, so it sits under the last one. #}
+          <p class="field-note{% if form.errors %} field-error{% endif %}"{% if form.errors %} role="alert"{% endif %}>{% if form.errors %}<span class="mark" aria-hidden="true"></span>Usuário ou senha incorretos.{% endif %}</p>
+        </div>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn btn-primary btn-block">Entrar<span class="spinner" aria-hidden="true"></span></button>
+      </form>
+    </section>
+  </main>
+  {% include "boards/_footer.html" %}
 </div>
 {% endblock %}

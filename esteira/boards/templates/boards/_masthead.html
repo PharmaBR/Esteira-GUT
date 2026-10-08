@@ -1,23 +1,17 @@
+{# N1a: wordmark, the two versions, sign out. The same on every screen. #}
 <header class="masthead">
-  <div class="masthead-top">
-    <h1>Esteira GUT</h1>
-    <form method="post" action="{% url 'logout' %}" class="logout">
-      {% csrf_token %}
-      <button type="submit" class="link-button">Sair</button>
-    </form>
-  </div>
+  <h1 class="wordmark">Esteira GUT</h1>
   {% now "l, j \d\e F" as today_label %}
-  <p class="date">{{ today_label|lower }}</p>
-  {% if board.is_enhanced %}
-  <p class="tagline">Sua fila é privada · prioridade = G × U × T ÷ esforço + espera</p>
-  {% else %}
-  <p class="tagline">Sua fila é privada · GUT = Gravidade × Urgência × Tendência · máx. 125</p>
-  {% endif %}
+  <p class="today">{{ today_label|lower }}</p>
   {% if boards|length > 1 %}
-  <nav class="tabs" aria-label="Versões da esteira">
+  <nav class="versions" aria-label="Versões da esteira">
     {% for item in boards %}
-    <a href="{{ item.get_absolute_url }}" class="tab"{% if item.pk == board.pk %} aria-current="page"{% endif %}>{{ item.name }}</a>
+    <a href="{{ item.get_absolute_url }}" class="link"{% if item.pk == board.pk and not review %} aria-current="page"{% endif %}>{{ item.name }}</a>
     {% endfor %}
   </nav>
   {% endif %}
+  <form method="post" action="{% url 'logout' %}" class="logout">
+    {% csrf_token %}
+    <button type="submit" class="link">Sair</button>
+  </form>
 </header>

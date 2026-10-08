@@ -8,9 +8,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
+from django_htmx.http import retarget
 
-from esteira.domain.rules import OPEN_STATUSES, RuleViolation, Status, estimate_accuracy
-from esteira.domain.scoring import Effort
+from esteira.domain.rules import (
+    OPEN_STATUSES,
+    RuleViolation,
+    Status,
+    ensure_reason,
+    estimate_accuracy,
+)
+from esteira.domain.scoring import BANDS, MAX_SCORE, Effort
 
 from .forms import CompletionForm, task_form_class
 from .models import Board, Task
@@ -47,7 +54,7 @@ def _task(request, pk):
     return task
 
 
-def _context(request, board, form=None, error=None, completion_form=None):
+def _context(request, board, form=None, error=None, completion_form=None, reason_error=None):
     now = timezone.localtime()
     queue = board.ranked_queue(now)
     done = board.done_tasks()
@@ -61,8 +68,15 @@ def _context(request, board, form=None, error=None, completion_form=None):
         "done_count": done.count(),
         "form": form or task_form_class(board)(),
         "error": error,
+        "reason_error": reason_error,
         "today": now.date(),
     }
+    if running and not board.is_enhanced and queue:
+        # The original's rule 5: only swap tasks when the newcomer outranks the current one.
+        current = board.policy.priority(running, now)
+        if queue[0].priority.score > current.score:
+            context["outranked_by"] = queue[0]
+            context["running_score"] = current.score
     if board.is_enhanced:
         if running and completion_form is None:
             measured = running.measured_effort(now)
@@ -70,14 +84,25 @@ def _context(request, board, form=None, error=None, completion_form=None):
         context.update(
             paused=board.with_status(Status.PAUSED),
             blocked=board.with_status(Status.BLOCKED),
+            discarded=board.with_status(Status.DISCARDED).order_by("-pk")[:DONE_SHOWN],
             open_count=board.open_count(),
             completion_form=completion_form,
         )
     return context
 
 
+def _band_legend():
+    """The score bands as rows for the help panel: label and the range it covers."""
+    ceilings = [MAX_SCORE, *(band.floor - 1 for band in BANDS)]
+    return [
+        {"label": band.label, "range": f"{band.floor} a {ceiling}"}
+        for band, ceiling in zip(BANDS, ceilings, strict=False)
+    ]
+
+
 def _page(request, board, context, status=200):
     context["boards"] = Board.for_user(request.user)
+    context["bands"] = _band_legend()
     return render(request, "boards/board.html", context, status=status)
 
 
@@ -196,8 +221,11 @@ def task_edit(request, pk):
         return _respond(request, task.board)
     status = UNPROCESSABLE if request.method == "POST" else 200
     context = {"board": task.board, "task": task, "form": form}
-    template = "boards/_task_edit.html" if request.htmx else "boards/task_edit.html"
-    return render(request, template, context, status=status)
+    if not request.htmx:
+        return render(request, "boards/task_edit.html", context, status=status)
+    response = render(request, "boards/_task_edit.html", context, status=status)
+    # The form asks for the whole board back; an invalid one only replaces itself.
+    return retarget(response, f"#task-{task.pk}")
 
 
 @login_required
@@ -237,12 +265,29 @@ def _task_action(action):
 
 task_return = _task_action(lambda task, request: task.return_to_queue(timezone.now()))
 task_delete = _task_action(lambda task, request: task.remove())
-task_pause = _task_action(
-    lambda task, request: task.pause(timezone.now(), request.POST.get("reason"))
-)
-task_block = _task_action(
-    lambda task, request: task.block(timezone.now(), request.POST.get("reason"))
-)
+
+
+def _reason_action(kind, action):
+    """Pausing and blocking ask why; a blank answer comes back inside the form that asked."""
+
+    @login_required
+    @require_POST
+    @transaction.atomic
+    def view(request, pk):
+        task = _task(request, pk)
+        try:
+            reason = ensure_reason(request.POST.get("reason"))
+        except RuleViolation as violation:
+            failed = {"kind": kind, "task": task.pk, "message": str(violation)}
+            return _respond(request, task.board, reason_error=failed, status=UNPROCESSABLE)
+        return _attempt(request, task.board, lambda: action(task, timezone.now(), reason))
+
+    return view
+
+
+task_pause = _reason_action("pause", Task.pause)
+task_block = _reason_action("block", Task.block)
 task_resume = _task_action(lambda task, request: task.resume(timezone.now()))
 task_unblock = _task_action(lambda task, request: task.unblock())
 task_discard = _task_action(lambda task, request: task.discard())
+task_restore = _task_action(lambda task, request: task.restore())

@@ -202,7 +202,7 @@ def test_blocking_needs_a_reason(client, enhanced, add_task):
     response = client.post(reverse("task-block", args=[task.pk]), {"reason": "  "}, **HTMX)
 
     task.refresh_from_db()
-    assert response.status_code == 409 and task.status == Status.QUEUED
+    assert response.status_code == 422 and task.status == Status.QUEUED
 
 
 def test_classic_has_no_blocked_state(client, classic, add_task):
@@ -285,6 +285,38 @@ def test_discarding_keeps_the_record_but_leaves_the_queue(client, enhanced, add_
     assert titles(enhanced) == []
 
 
+def test_a_discarded_task_can_be_restored(client, enhanced, add_task):
+    task = add_task(enhanced, "descartei sem querer", effort="s", status=Status.DISCARDED)
+
+    listed = client.get(enhanced.get_absolute_url()).content.decode()
+    client.post(reverse("task-restore", args=[task.pk]), **HTMX)
+
+    task.refresh_from_db()
+    assert "descartei sem querer" in listed
+    assert task.status == Status.QUEUED
+
+
+def test_discarding_does_not_ask_are_you_sure(client, enhanced, add_task):
+    """Undo over confirm: a discard is reversible, so it happens at once."""
+    add_task(enhanced, "na fila", effort="s")
+
+    html = client.get(enhanced.get_absolute_url()).content.decode()
+
+    assert "hx-confirm" not in html
+
+
+def test_restoring_respects_the_ceiling(client, enhanced, add_task):
+    enhanced.queue_limit = 1
+    enhanced.save()
+    add_task(enhanced, "ocupa a vaga", effort="s")
+    task = add_task(enhanced, "descartada", effort="s", status=Status.DISCARDED)
+
+    response = client.post(reverse("task-restore", args=[task.pk]), **HTMX)
+
+    task.refresh_from_db()
+    assert response.status_code == 409 and task.status == Status.DISCARDED
+
+
 # ── R10: feedback at completion ─────────────────────────────────────
 
 
@@ -339,7 +371,8 @@ def test_the_classic_esteira_has_no_review(client, classic):
 
 
 @pytest.mark.parametrize(
-    "action", ["task-block", "task-unblock", "task-pause", "task-resume", "task-discard"]
+    "action",
+    ["task-block", "task-unblock", "task-pause", "task-resume", "task-discard", "task-restore"],
 )
 def test_other_peoples_tasks_do_not_exist(client, stranger, add_task, action):
     theirs = Board.objects.create(owner=stranger, name="Alheia", mode=Board.Mode.ENHANCED)

@@ -1,15 +1,17 @@
+{# One line saying why the task sits where it does, in words first and numbers after. #}
 <p class="meta">
+  {% if priority.band %}<span class="tag">{% if priority.band.key == "now" %}<span class="mark" aria-hidden="true"></span>{% endif %}{{ priority.band.label|capfirst }}</span>{% endif %}
   {% if not board.is_enhanced %}
-  <span class="gut">G{{ task.gravity }} · U{{ task.urgency }} · T{{ task.trend }}</span>
+  <span class="sum nb"><abbr title="Gravidade">G</abbr>{{ task.gravity }} × <abbr title="Urgência">U</abbr>{{ task.urgency }} × <abbr title="Tendência">T</abbr>{{ task.trend }}</span>
   {% elif priority %}
-  <span class="gut">G{{ task.gravity }} · U{{ priority.urgency }}{% if priority.urgency_from_deadline %}<abbr title="Urgência calculada pelo prazo">*</abbr>{% endif %} · T{{ task.trend }} = {{ priority.gut }} ÷ {{ priority.effort.weight }}{% if priority.aging_bonus %} + {{ priority.aging_bonus|floatformat:"-1" }}{% endif %}</span>
+  <span class="sum"><span class="nb"><abbr title="Gravidade">G</abbr>{{ task.gravity }} × <abbr title="Urgência{% if priority.urgency_from_deadline %}, calculada pelo prazo{% endif %}">U</abbr>{{ priority.urgency }} × <abbr title="Tendência">T</abbr>{{ task.trend }}</span> <span class="nb">= {{ priority.gut }} ÷ {{ priority.effort.weight }}{% if priority.aging_bonus %} + {{ priority.aging_bonus|floatformat:"-1" }}{% endif %}</span></span>
   {% endif %}
-  {% if task.effort %}<span>{{ task.get_effort_display }}</span>{% endif %}
+  {% if task.effort %}<span>{{ task.get_effort_display|capfirst }}</span>{% endif %}
   <span>{{ task.get_category_display }}</span>
   {% if task.due_date %}
-  {% if board.is_enhanced and task.due_date < today %}<span class="overdue">atrasada (prazo {{ task.due_date|date:"j/m" }})</span>
-  {% elif board.is_enhanced and task.due_date == today %}<span class="overdue">vence hoje</span>
-  {% else %}<span>prazo {{ task.due_date|date:"j/m" }}</span>{% endif %}
+  {% if board.is_enhanced and task.due_date < today %}<span class="late">Atrasada, prazo {{ task.due_date|date:"j/m" }}</span>
+  {% elif board.is_enhanced and task.due_date == today %}<span class="late">Vence hoje</span>
+  {% else %}<span>Prazo {{ task.due_date|date:"j/m" }}</span>{% endif %}
   {% endif %}
-  {% if priority.weeks_waiting %}<span>{{ priority.weeks_waiting }} sem. na fila</span>{% endif %}
+  {% if priority.weeks_waiting %}<span>{{ priority.weeks_waiting }} semana{{ priority.weeks_waiting|pluralize }} na fila</span>{% endif %}
 </p>

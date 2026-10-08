@@ -42,6 +42,8 @@ TRANSITIONS: dict[Mode, dict[Status, frozenset[Status]]] = {
         Status.RUNNING: frozenset({Status.DONE, Status.PAUSED, Status.BLOCKED}),
         Status.PAUSED: frozenset({Status.RUNNING, Status.BLOCKED, Status.DISCARDED}),
         Status.BLOCKED: frozenset({Status.QUEUED, Status.DISCARDED}),
+        # A discard can be taken back: undo instead of an "are you sure?" dialog.
+        Status.DISCARDED: frozenset({Status.QUEUED}),
     },
 }
 
