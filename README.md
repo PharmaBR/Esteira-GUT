@@ -70,6 +70,23 @@ primeiro deploy, crie seu usuário pelo console do serviço: `python manage.py c
 
 **Docker Compose:** `cp .env.example .env`, preencha, e `docker compose up -d --build`.
 
+**VPS vazio (Docker Manager da Hostinger, Portainer ou `docker compose`):** use
+[`deploy/docker-compose.vps.yml`](deploy/docker-compose.vps.yml). Ele sobe Caddy (HTTPS automático),
+a aplicação e o Postgres, e constrói a imagem direto do repositório (branch `main`), então o arquivo
+sozinho basta. Antes de subir, aponte o registro A do domínio para o IP do VPS. Variáveis:
+
+| Variável | Para quê |
+| --- | --- |
+| `DOMAIN` | Domínio público, sem `https://` (ex.: `esteira.exemplo.com.br`) |
+| `DJANGO_SECRET_KEY` | Como acima |
+| `POSTGRES_PASSWORD` | `python -c "import secrets; print(secrets.token_urlsafe(32))"` (sem caracteres especiais de URL) |
+
+Para publicar uma nova versão, faça merge em `main` e reimplante com novo build
+(`docker compose -f deploy/docker-compose.vps.yml up -d --build`, ou "Rebuild" no painel).
+Para trazer dados de outra instalação: `python manage.py dumpdata --natural-foreign --natural-primary
+-e contenttypes -e auth.permission -e admin.logentry -e sessions > dados.json` na origem e, no VPS,
+`docker compose -f deploy/docker-compose.vps.yml exec -T web python manage.py loaddata --format=json - < dados.json`.
+
 ## Organização
 
 ```
