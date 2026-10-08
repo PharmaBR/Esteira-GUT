@@ -1,0 +1,141 @@
+/* Esteira GUT · design tokens. The system they belong to is described in design.md.
+ * Every colour and font used by app.css is named here; app.css holds no raw values.
+ */
+
+/* Atkinson Hyperlegible (Braille Institute), SIL Open Font License 1.1, served from this app. */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("../fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Mono";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("../fonts/atkinson-hyperlegible-mono-latin-wght-normal.woff2") format("woff2");
+}
+
+/* Fallbacks resized to the web fonts' metrics, so text does not jump when they arrive. */
+@font-face {
+  font-family: "Esteira Sans Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Helvetica");
+  size-adjust: 99.3%;
+  ascent-override: 99.1%;
+  descent-override: 31.8%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Esteira Mono Fallback";
+  src: local("Courier New"), local("Liberation Mono"), local("Menlo");
+  size-adjust: 105.3%;
+  ascent-override: 93.4%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
+:root {
+  color-scheme: light dark;
+
+  /* Colour. One anchor hue (warm, 60-85 degrees) tints every neutral; red is the only accent. */
+  --color-paper: oklch(96.5% 0.012 85);
+  --color-paper-2: oklch(93.5% 0.014 85);
+  --color-field: oklch(98.8% 0.006 85);
+  --color-rule: oklch(80% 0.014 80);
+  --color-edge: oklch(52% 0.014 75);
+  --color-muted: oklch(42% 0.014 70);
+  --color-ink: oklch(22% 0.012 60);
+  --color-ink-2: oklch(32% 0.012 60);
+  --color-accent: oklch(50% 0.18 28);
+  --color-accent-ink: var(--color-paper);
+  --color-focus: var(--color-ink);
+
+  /* Type. One superfamily on purpose: letterforms that cannot be mistaken for one another. */
+  --font-display: "Atkinson Hyperlegible Next", "Esteira Sans Fallback", sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", "Esteira Sans Fallback", sans-serif;
+  --font-outlier: "Atkinson Hyperlegible Mono", "Esteira Mono Fallback", monospace;
+
+  --weight-body: 400;
+  --weight-strong: 700;
+  --weight-display: 800;
+
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-md: 1.3125rem;
+  --text-lg: 1.625rem;
+  --text-xl: clamp(2rem, 1.4rem + 2.6vw, 2.75rem);
+  --text-figure: clamp(3rem, 2rem + 6vw, 4.5rem);
+
+  --leading-body: 1.55;
+  --leading-tight: 1.2;
+  --tracking-body: 0.005em;
+  --tracking-display: -0.015em;
+  --measure: 60ch;
+
+  /* Space. A 4-point scale, named by role. */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  /* Rules do the structure: there are no cards and no shadows. */
+  --rule-hair: 1px;
+  --rule-edge: 1.5px;
+  --rule-ink: 2px;
+  --rule-signal: 4px;
+  --radius-card: 0;
+  --radius-input: 4px;
+
+  --control-h: 3rem;
+  --hit: 2.75rem;
+  --figure-w: 4.5rem;
+  --spinner: 0.8em;
+  --ring: 3px;
+
+  /* Motion. Only the request indicators move. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+  --indicator-delay: 150ms;
+
+  --z-base: 1;
+  --z-sticky: 200;
+  --z-toast: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: oklch(19% 0.012 70);
+    --color-paper-2: oklch(23% 0.014 70);
+    --color-field: oklch(15.5% 0.01 70);
+    --color-rule: oklch(36% 0.012 70);
+    --color-edge: oklch(62% 0.012 75);
+    --color-muted: oklch(76% 0.012 80);
+    --color-ink: oklch(92% 0.01 85);
+    --color-ink-2: oklch(84% 0.01 85);
+    --color-accent: oklch(72% 0.15 28);
+
+    /* Light text on a dark ground looks heavier than it is. */
+    --weight-body: 350;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-rule: var(--color-edge);
+    --color-edge: var(--color-ink);
+    --color-muted: var(--color-ink);
+  }
+}
