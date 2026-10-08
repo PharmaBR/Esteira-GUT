@@ -1,0 +1,22 @@
+{
+  "scanned": "2026-10-08",
+  "framework": "Django 5.2 templates + htmx 2 (server-rendered HTML, no bundler)",
+  "design_md": "design.md (written by this run)",
+  "font_stack": {
+    "found": "system font stack in esteira/boards/static/boards/css/app.css",
+    "now": "Atkinson Hyperlegible Next + Mono, self-hosted in static/boards/fonts (OFL-1.1)"
+  },
+  "palette": {
+    "found": "hex custom properties in app.css :root",
+    "now": "OKLCH tokens in esteira/boards/static/boards/css/tokens.css"
+  },
+  "motion": "no motion library; CSS only, request indicators are the only movement",
+  "spacing": "4-point named scale in tokens.css",
+  "constraints": [
+    "Content-Security-Policy default-src 'self': no inline style or script, no external origins",
+    "Every htmx request needs hx-indicator and hx-disabled-elt (CLAUDE.md, test_status_indicator.py)",
+    "The server answers HTML only; every action swaps the whole #board block"
+  ],
+  "preserved": ["routes", "views and domain rules", "htmx request contract", "copy intent", "information architecture"],
+  "introduced": ["design.md", "tokens.css", "self-hosted fonts", "test_design_system.py"]
+}

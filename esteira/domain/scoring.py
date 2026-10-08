@@ -14,6 +14,7 @@ from typing import Any, Protocol
 
 MIN_RATING = 1
 MAX_RATING = 5
+MAX_SCORE = MAX_RATING**3
 
 
 class InvalidRating(ValueError):
@@ -27,26 +28,52 @@ def gut_score(gravity: int, urgency: int, trend: int) -> int:
     return gravity * urgency * trend
 
 
+@dataclass(frozen=True)
+class Band:
+    """What a classic score means in words, so nobody has to interpret a bare number."""
+
+    floor: int
+    label: str
+    key: str
+
+
+# The original's legend, highest first.
+BANDS = (
+    Band(75, "fazer já", "now"),
+    Band(40, "nesta semana", "week"),
+    Band(20, "agendar", "schedule"),
+    Band(1, "quando sobrar tempo", "spare"),
+)
+
+
+def band_for(score: int) -> Band:
+    for band in BANDS:
+        if score >= band.floor:
+            return band
+    raise InvalidRating(f"Nota fora da escala: {score}.")
+
+
 # What each rating means. Concrete on purpose: a scale without anchors drifts to 3 or to 5.
+# Short on purpose too: each one has to fit a closed <select> on a phone.
 # The urgency anchors mirror DEADLINE_URGENCY below, so a guess and a date agree.
 ANCHORS = {
     "gravity": {
-        1: "ninguém nota se não for feito",
-        2: "incômodo pequeno, fácil de reverter",
-        3: "prejuízo real, mas recuperável",
-        4: "prejuízo grande ou difícil de reverter",
-        5: "dano irreversível ou que atinge outras pessoas",
+        1: "ninguém nota se não fizer",
+        2: "incômodo leve, reversível",
+        3: "prejuízo real, recuperável",
+        4: "prejuízo sério ou duradouro",
+        5: "dano irreversível ou a outros",
     },
     "urgency": {
-        1: "pode esperar mais de duas semanas",
-        2: "cabe nas próximas duas semanas",
+        1: "espera mais de 2 semanas",
+        2: "cabe em 2 semanas",
         3: "precisa sair nesta semana",
-        4: "precisa sair em um ou dois dias",
+        4: "precisa sair em 2 dias",
         5: "precisa sair hoje",
     },
     "trend": {
         1: "não piora com o tempo",
-        2: "piora devagar, ao longo de meses",
+        2: "piora devagar, em meses",
         3: "piora em semanas",
         4: "piora em dias",
         5: "piora a cada hora",
@@ -128,6 +155,7 @@ class Priority:
     gut: int
     urgency: int
     sort_key: tuple[Any, ...]
+    band: Band | None = None
     urgency_from_deadline: bool = False
     crisis: bool = False
     effort: Effort | None = None
@@ -142,7 +170,11 @@ class Ranked:
 
 
 class ClassicGUT:
-    """The original esteira: highest G x U x T first, ties in arrival order."""
+    """The original esteira: highest G x U x T first.
+
+    Ties go to the nearest deadline, as the original's own help text says;
+    whatever is still tied stays in arrival order.
+    """
 
     def priority(self, task: Rankable, now: datetime) -> Priority:
         score = gut_score(task.gravity, task.urgency, task.trend)
@@ -150,7 +182,8 @@ class ClassicGUT:
             score=score,
             gut=score,
             urgency=task.urgency,
-            sort_key=(-score, task.created_at),
+            band=band_for(score),
+            sort_key=(-score, task.due_date or date.max, task.created_at),
         )
 
     def rank(self, tasks: Iterable[Rankable], now: datetime) -> list[Ranked]:

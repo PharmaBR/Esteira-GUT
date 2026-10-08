@@ -249,6 +249,12 @@ class Task(models.Model):
         self._move_to(Status.DISCARDED)
         self.save()
 
+    def restore(self):
+        """Take a discard back. The task returns to the queue if there is room."""
+        self.board.ensure_room()
+        self._move_to(Status.QUEUED)
+        self.save()
+
     def remove(self):
         """Delete a task that was never started."""
         if self.status != Status.QUEUED:

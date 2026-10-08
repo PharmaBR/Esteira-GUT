@@ -9,8 +9,9 @@ instalada na tela inicial.
 Cada pessoa tem duas esteiras, em abas:
 
 - **Clássica** — fiel à ideia original. Três notas de 1 a 5 (**G**ravidade, **U**rgência,
-  **T**endência), multiplicadas (máx. 125). A maior nota fica no topo; empates, na ordem de
-  chegada. Só uma tarefa em execução por vez.
+  **T**endência), multiplicadas (máx. 125). A maior nota fica no topo; empates, pelo prazo mais
+  próximo. Cada nota cai em uma faixa: fazer já (75 ou mais), nesta semana (40 a 74), agendar
+  (20 a 39) e quando sobrar tempo. Só uma tarefa em execução por vez.
 - **Aprimorada** — a mesma matriz, com as correções da auditoria metodológica: urgência
   calculada pelo prazo, nota dividida pelo esforço, crises na frente, desempate, bônus por tempo
   de espera, estados "pausada" e "bloqueada", triagem na entrada, teto de tarefas abertas e
@@ -20,6 +21,16 @@ O porquê de cada regra, com o código, o teste e a referência científica de c
 [`docs/auditoria.md`](docs/auditoria.md).
 
 A fila é privada: cada pessoa entra com sua conta e só enxerga as próprias esteiras.
+
+## Visual
+
+A interface foi desenhada para ser calma e fácil de ler, com atenção a quem é neurodivergente: uma
+família tipográfica de alta legibilidade, papel creme, fios em vez de caixas, um único vermelho
+para o que precisa de você agora, rótulos sempre visíveis e nada que se mexa ou suma sozinho. As
+regras e os motivos estão em [`design.md`](design.md).
+
+As fontes Atkinson Hyperlegible Next e Mono (Braille Institute, licença SIL OFL 1.1) são servidas
+pela própria aplicação; as licenças estão em `esteira/boards/static/boards/fonts/`.
 
 ## Rodar no seu computador
 
@@ -71,4 +82,4 @@ esteira/
 As duas versões compartilham tudo, menos a política: `ClassicGUT` e `EnhancedGUT` em
 `esteira/domain/scoring.py`, escolhidas por `Board.mode`.
 
-Convenções do projeto: [`CLAUDE.md`](CLAUDE.md).
+Convenções do projeto: [`CLAUDE.md`](CLAUDE.md). Sistema visual: [`design.md`](design.md).

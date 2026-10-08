@@ -1,0 +1,21 @@
+[
+  {
+    "date": "2026-10-08",
+    "scope": "app",
+    "genre": "editorial",
+    "macrostructure": "Index-First",
+    "macrostructure_family": {
+      "app": "Index-First",
+      "content": "Stat-Led",
+      "form": "single column"
+    },
+    "theme": "custom",
+    "theme_axes": "light / grotesk-sans / warm",
+    "vibe": "calm, legible, ruled, one signal red",
+    "enrichment": "none",
+    "nav": "N1a",
+    "footer": "Ft2",
+    "design_system": "design.md",
+    "brief": "Esteira GUT · personal GUT-matrix task queue, designed for a neurodivergent reader"
+  }
+]

@@ -1,40 +1,43 @@
-<article class="card running">
-  <h3 class="running-title">{{ running.title }}</h3>
-  {% include "boards/_task_meta.html" with task=running priority=None %}
-  {% if board.is_enhanced %}
-  <p class="hint">Iniciada às {{ running.started_at|date:"H:i" }}{% if running.interruptions %} · {{ running.interruptions }} interrupç{{ running.interruptions|pluralize:"ão,ões" }}{% endif %}</p>
-  <form method="post" action="{% url 'task-complete' running.pk %}" class="task-form completion" novalidate
+<h3 class="now-title">{{ running.title }}</h3>
+{% include "boards/_task_meta.html" with task=running priority=None %}
+{% if board.is_enhanced %}
+<p class="hint">Iniciada às {{ running.started_at|date:"H:i" }}.{% if running.interruptions %} {{ running.interruptions }} interrupç{{ running.interruptions|pluralize:"ão,ões" }}.{% endif %}</p>
+<form method="post" action="{% url 'task-complete' running.pk %}" class="form subform" novalidate
+      hx-post="{% url 'task-complete' running.pk %}" hx-target="#board" hx-swap="outerHTML"
+      hx-indicator="this" hx-disabled-elt="find button">
+  {% csrf_token %}
+  {% include "boards/_field.html" with field=completion_form.actual_effort %}
+  <fieldset>
+    <legend>{{ completion_form.priority_verdict.label }}</legend>
+    {% for radio in completion_form.priority_verdict %}
+    <label class="check">{{ radio.tag }} <span>{{ radio.choice_label }}</span></label>
+    {% endfor %}
+    <p class="field-note{% if completion_form.priority_verdict.errors %} field-error{% endif %}">{% if completion_form.priority_verdict.errors %}<span class="mark" aria-hidden="true"></span>Escolha uma das três opções.{% endif %}</p>
+  </fieldset>
+  <button type="submit" class="btn btn-primary btn-block">Concluir tarefa<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+</form>
+<div class="row-actions">
+  {% url 'task-pause' running.pk as pause_url %}
+  {% include "boards/_reason_form.html" with url=pause_url label="Pausar" question="O que interrompeu?" kind="pause" task=running %}
+  {% url 'task-block' running.pk as block_url %}
+  {% include "boards/_reason_form.html" with url=block_url label="Bloquear" question="Está esperando o quê, ou quem?" kind="block" task=running %}
+</div>
+{% else %}
+{% if outranked_by %}
+<p class="hint">A primeira da fila tem nota maior ({{ outranked_by.priority.score }}) que esta tarefa ({{ running_score }}). Se quiser trocar, devolva esta à fila.</p>
+{% endif %}
+<div class="actions">
+  <form method="post" action="{% url 'task-complete' running.pk %}"
         hx-post="{% url 'task-complete' running.pk %}" hx-target="#board" hx-swap="outerHTML"
         hx-indicator="this" hx-disabled-elt="find button">
     {% csrf_token %}
-    {% include "boards/_field.html" with field=completion_form.actual_effort %}
-    <fieldset class="choices">
-      <legend>{{ completion_form.priority_verdict.label }}</legend>
-      {% for radio in completion_form.priority_verdict %}
-      <label class="check">{{ radio.tag }} <span>{{ radio.choice_label }}</span></label>
-      {% endfor %}
-      {% if completion_form.priority_verdict.errors %}<div class="field-error" role="alert">Escolha uma das opções.</div>{% endif %}
-    </fieldset>
-    <button type="submit" class="btn btn-primary btn-block">Concluir<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+    <button type="submit" class="btn btn-primary">Concluir tarefa<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
   </form>
-  {% url 'task-pause' running.pk as pause_url %}
-  {% include "boards/_reason_form.html" with url=pause_url label="Pausar" placeholder="O que interrompeu?" kind="pause" task=running %}
-  {% url 'task-block' running.pk as block_url %}
-  {% include "boards/_reason_form.html" with url=block_url label="Bloquear" placeholder="Está esperando o quê, ou quem?" kind="block" task=running %}
-  {% else %}
-  <div class="actions">
-    <form method="post" action="{% url 'task-complete' running.pk %}"
-          hx-post="{% url 'task-complete' running.pk %}" hx-target="#board" hx-swap="outerHTML"
-          hx-indicator="this" hx-disabled-elt="find button">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-primary">Concluir<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
-    </form>
-    <form method="post" action="{% url 'task-return' running.pk %}"
-          hx-post="{% url 'task-return' running.pk %}" hx-target="#board" hx-swap="outerHTML"
-          hx-indicator="this" hx-disabled-elt="find button">
-      {% csrf_token %}
-      <button type="submit" class="btn">Devolver à fila<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
-    </form>
-  </div>
-  {% endif %}
-</article>
+  <form method="post" action="{% url 'task-return' running.pk %}"
+        hx-post="{% url 'task-return' running.pk %}" hx-target="#board" hx-swap="outerHTML"
+        hx-indicator="this" hx-disabled-elt="find button">
+    {% csrf_token %}
+    <button type="submit" class="btn">Devolver à fila<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+  </form>
+</div>
+{% endif %}

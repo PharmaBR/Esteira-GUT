@@ -1,25 +1,19 @@
-{# The audited form: anchored scales with nothing preselected, deadline before urgency, effort, triage. #}
-{% if form.non_field_errors %}<div class="field-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
-<div class="field">
-  <label for="{{ form.title.id_for_label }}" class="sr-only">{{ form.title.label }}</label>
-  {{ form.title }}
-  {% if form.title.errors %}<div class="field-error" role="alert">{{ form.title.errors }}</div>{% endif %}
-</div>
+{# The audited form: described scales with nothing preselected, deadline before urgency, effort, triage. #}
+{% if form.non_field_errors and not form.important %}<p class="field-error" role="alert"><span class="mark" aria-hidden="true"></span>{{ form.non_field_errors|join:" " }}</p>{% endif %}
+{% include "boards/_field.html" with field=form.title %}
 {% include "boards/_field.html" with field=form.gravity %}
 {% include "boards/_field.html" with field=form.trend %}
-<div class="field-pair">
-  {% include "boards/_field.html" with field=form.due_date %}
-  {% include "boards/_field.html" with field=form.urgency %}
-</div>
-<p class="hint">Com prazo, a urgência é calculada a cada dia e sobe sozinha quando ele se aproxima.</p>
+{% include "boards/_field.html" with field=form.due_date %}
+{% include "boards/_field.html" with field=form.urgency %}
 <div class="field-pair">
   {% include "boards/_field.html" with field=form.effort %}
   {% include "boards/_field.html" with field=form.category %}
 </div>
 {% if form.important %}
-<fieldset class="triage">
+<fieldset>
   <legend>Antes de entrar na fila</legend>
   <label class="check">{{ form.important }} <span>{{ form.important.label }}</span></label>
   <label class="check">{{ form.mine }} <span>{{ form.mine.label }}</span></label>
+  <p class="field-note{% if form.non_field_errors %} field-error{% endif %}"{% if form.non_field_errors %} role="alert"{% endif %}>{% if form.non_field_errors %}<span class="mark" aria-hidden="true"></span>{{ form.non_field_errors|join:" " }}{% endif %}</p>
 </fieldset>
 {% endif %}

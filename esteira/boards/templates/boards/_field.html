@@ -1,5 +1,6 @@
+{# One field: visible label above, the control, and a line below that is kept even when empty. #}
 <div class="field">
   <label for="{{ field.id_for_label }}">{{ field.label }}</label>
   {{ field }}
-  {% if field.errors %}<div class="field-error" role="alert">{{ field.errors }}</div>{% endif %}
+  <p class="field-note{% if field.errors %} field-error{% endif %}" id="{{ field.auto_id }}_error">{% if field.errors %}<span class="mark" aria-hidden="true"></span>{{ field.errors|join:" " }}{% elif field.help_text %}<span id="{{ field.auto_id }}_helptext">{{ field.help_text }}</span>{% endif %}</p>
 </div>

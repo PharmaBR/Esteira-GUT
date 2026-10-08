@@ -1,11 +1,11 @@
-<li class="card task editing" id="task-{{ task.pk }}">
-  <form method="post" action="{% url 'task-edit' task.pk %}" class="task-form" novalidate
+<li class="task editing" id="task-{{ task.pk }}">
+  <form method="post" action="{% url 'task-edit' task.pk %}" class="form" novalidate
         hx-post="{% url 'task-edit' task.pk %}" hx-target="#board" hx-swap="outerHTML"
         hx-indicator="this" hx-disabled-elt="find button">
     {% csrf_token %}
     {% include form.fields_template %}
     <div class="actions">
-      <button type="submit" class="btn btn-primary">Salvar<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+      <button type="submit" class="btn btn-primary">Salvar alterações<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
       <a class="btn" href="{{ board.get_absolute_url }}"
          hx-get="{{ board.get_absolute_url }}" hx-target="#board" hx-swap="outerHTML"
          hx-indicator="this" hx-disabled-elt="this">Cancelar<span class="spinner htmx-indicator" aria-hidden="true"></span></a>

@@ -1,30 +1,52 @@
 <div class="help-body">
   {% if board.is_enhanced %}
-  <p>Esta é a esteira aprimorada: a mesma matriz GUT, com as correções da auditoria.</p>
-  <dl class="anchors">
-    <dt>G · Gravidade e T · Tendência</dt>
-    <dd>Você escolhe, de 1 a 5, sem valor sugerido. Cada nível diz o que significa.</dd>
-    <dt>U · Urgência</dt>
-    <dd>Com prazo, é calculada todo dia: 5 se vence hoje, 4 em até 2 dias, 3 em até 7, 2 em até 14, 1 depois disso. Sem prazo, você escolhe.</dd>
+  <p>Esta é a esteira aprimorada. Ela usa a mesma matriz GUT da clássica, com as correções da auditoria.</p>
+  <dl>
+    <dt>Gravidade e Tendência</dt>
+    <dd>Você escolhe uma nota de 1 a 5. Cada nota diz o que significa. Nenhuma vem marcada.</dd>
+    <dt>Urgência</dt>
+    <dd>Com prazo, a esteira calcula todo dia: 5 se vence hoje, 4 em até 2 dias, 3 em até 7 dias, 2 em até 14 dias, 1 depois disso. Sem prazo, você escolhe.</dd>
     <dt>Prioridade</dt>
-    <dd>G × U × T dividido pelo esforço (15 min = 1, 1 h = 2, meio período = 3, um dia = 5, mais que isso = 8), mais 2 pontos por semana completa de espera.</dd>
+    <dd>Gravidade × Urgência × Tendência, dividido pelo esforço. Os pesos do esforço são: 15 minutos = 1, 1 hora = 2, meio período = 3, um dia = 5, mais de um dia = 8. Cada semana completa de espera soma 2 pontos.</dd>
     <dt>Crise</dt>
-    <dd>Gravidade 5 com urgência 5 passa na frente de tudo.</dd>
-    <dt>Empates</dt>
-    <dd>Vence o prazo mais próximo; depois, a tarefa mais antiga.</dd>
+    <dd>Uma tarefa com gravidade 5 e urgência 5 vai para o início da fila.</dd>
+    <dt>Empate</dt>
+    <dd>Vem antes a tarefa de prazo mais próximo. Depois, a mais antiga.</dd>
   </dl>
-  <p>Só entra o que é importante e seu, até o teto de {{ board.queue_limit }} tarefas abertas. Só uma tarefa fica em execução: para sair dela sem concluir, pause (interrupção) ou bloqueie (depende de alguém), dizendo o motivo.</p>
-  <p>Compromissos com hora marcada, como aulas e reuniões, vão no calendário, não aqui.</p>
+  <ol>
+    <li>Só entra o que é importante e que só você pode fazer. O limite é de {{ board.queue_limit }} tarefas abertas.</li>
+    <li>Só uma tarefa fica em execução.</li>
+    <li>Para sair de uma tarefa sem concluir, escolha “Pausar” se foi uma interrupção ou “Bloquear” se depende de outra pessoa. Diga o motivo.</li>
+    <li>Ao concluir, diga quanto tempo levou e se a prioridade estava certa.</li>
+    <li>Uma vez por semana, abra a “Revisão semanal”.</li>
+  </ol>
+  <p>Compromissos com hora marcada, como aulas e reuniões, vão no calendário. Não vão aqui.</p>
   {% else %}
-  <p>Dê a cada tarefa três notas de 1 a 5. A esteira multiplica as três e põe a maior nota no topo.</p>
-  <dl class="anchors">
-    <dt>G · Gravidade</dt>
-    <dd>O estrago se a tarefa não for feita. 1 = sem gravidade · 5 = extremamente grave.</dd>
-    <dt>U · Urgência</dt>
-    <dd>O tempo que ainda existe. 1 = pode esperar · 5 = exige ação imediata.</dd>
-    <dt>T · Tendência</dt>
-    <dd>O quanto piora se ninguém agir. 1 = não muda · 5 = piora rapidamente.</dd>
+  <p>A matriz GUT dá uma nota para cada tarefa e mostra o que fazer primeiro. Você avalia três critérios, de 1 a 5, e a esteira multiplica: Gravidade × Urgência × Tendência. A nota vai de 1 a 125. Quanto maior a nota, mais cedo a tarefa aparece.</p>
+  <dl>
+    <dt>Gravidade</dt>
+    <dd>Qual o impacto se der errado ou não for feita? 5 = afeta dinheiro, saúde, pessoas ou um compromisso sério. 1 = quase nenhum impacto.</dd>
+    <dt>Urgência</dt>
+    <dd>Quanto tempo você tem? 5 = hoje ou amanhã. 3 = nesta semana. 1 = pode esperar semanas.</dd>
+    <dt>Tendência</dt>
+    <dd>O problema piora se você esperar? 5 = piora rápido ou perde o prazo. 1 = continua igual.</dd>
   </dl>
-  <p>Só uma tarefa fica em execução. Conclua-a (ou devolva à fila) antes de puxar a próxima.</p>
+  <dl>
+    <dt>O que a nota quer dizer</dt>
+    <dd>
+      <ul class="rows spec">
+        {% for band in bands %}
+        <li class="split"><span>{% if forloop.first %}<span class="mark" aria-hidden="true"></span>{% endif %}{{ band.label|capfirst }}</span><span class="value">{{ band.range }}</span></li>
+        {% endfor %}
+      </ul>
+    </dd>
+  </dl>
+  <ol>
+    <li>Anote tudo. Escreva cada pendência em “Nova tarefa”, sem pensar na ordem.</li>
+    <li>Dê as notas. Escolha Gravidade, Urgência e Tendência de cada uma. Na dúvida, use 3 e ajuste depois.</li>
+    <li>Siga a ordem da fila. A esteira ordena pela nota. Em empate, vem antes a de prazo mais próximo.</li>
+    <li>Faça uma tarefa por vez. Clique em “Iniciar a próxima”. Enquanto ela estiver em execução, as outras esperam.</li>
+    <li>Conclua e comece a próxima. Se surgir algo urgente, cadastre e dê a nota. Só troque de tarefa se a nova tiver nota maior que a atual.</li>
+  </ol>
   {% endif %}
 </div>

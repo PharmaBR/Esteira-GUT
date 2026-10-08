@@ -11,17 +11,21 @@ UNSET = [("", "Escolha…")]
 DEFAULT_RATING = 3
 
 TASK_WIDGETS = {
-    "title": forms.TextInput(
-        attrs={"placeholder": "O que precisa ser feito?", "autocomplete": "off"}
-    ),
+    "title": forms.TextInput(attrs={"autocomplete": "off"}),
     "due_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
 }
+# The question is the visible label, never a placeholder that vanishes on the first keystroke.
+TITLE_LABEL = "O que precisa ser feito?"
+# Error wording is ours and short: each message has one reserved line under its field,
+# and must fit there on a phone (tests/boards/test_feedback.py).
+TITLE_ERRORS = {"required": "Escreva o que precisa ser feito."}
 
 
 class RatingField(forms.TypedChoiceField):
     def __init__(self, **kwargs):
         kwargs.setdefault("choices", [(n, str(n)) for n in RATINGS])
         kwargs.setdefault("coerce", int)
+        kwargs.setdefault("error_messages", {"required": "Escolha uma nota."})
         super().__init__(**kwargs)
 
 
@@ -43,7 +47,8 @@ class ClassicTaskForm(forms.ModelForm):
         model = Task
         fields = ["title", "gravity", "urgency", "trend", "category", "due_date"]
         widgets = TASK_WIDGETS
-        labels = {"title": "Tarefa", "category": "Categoria", "due_date": "Prazo (opcional)"}
+        labels = {"title": TITLE_LABEL, "category": "Categoria", "due_date": "Prazo (opcional)"}
+        error_messages = {"title": TITLE_ERRORS}
 
     @property
     def rating_fields(self):
@@ -58,18 +63,24 @@ class EnhancedTaskForm(forms.ModelForm):
     gravity = RatingField(label="Gravidade", choices=anchored("gravity"))
     trend = RatingField(label="Tendência", choices=anchored("trend"))
     urgency = RatingField(
-        label="Urgência (só se não houver prazo)",
+        label="Urgência, se não houver prazo",
         choices=anchored("urgency"),
         required=False,
         empty_value=None,
     )
-    effort = forms.ChoiceField(label="Esforço estimado", choices=UNSET + EFFORT_CHOICES)
+    effort = forms.ChoiceField(
+        label="Esforço estimado",
+        choices=UNSET + EFFORT_CHOICES,
+        error_messages={"required": "Escolha o esforço."},
+    )
 
     class Meta:
         model = Task
         fields = ["title", "gravity", "trend", "due_date", "urgency", "effort", "category"]
         widgets = TASK_WIDGETS
-        labels = {"title": "Tarefa", "category": "Categoria", "due_date": "Prazo"}
+        labels = {"title": TITLE_LABEL, "category": "Categoria", "due_date": "Prazo"}
+        help_texts = {"due_date": "Com prazo, a urgência é calculada."}
+        error_messages = {"title": TITLE_ERRORS}
 
     def clean(self):
         cleaned = super().clean()
@@ -89,8 +100,8 @@ class EnhancedNewTaskForm(EnhancedTaskForm):
     mine = forms.BooleanField(label="Só eu posso fazer", required=False)
 
     ADVICE = {
-        Verdict.DISCARD: "Se não é importante, não entra na esteira: descarte.",
-        Verdict.DELEGATE: "É importante, mas não é sua: delegue a quem cabe.",
+        Verdict.DISCARD: "Não é importante: descarte.",
+        Verdict.DELEGATE: "Não é sua: delegue a quem cabe.",
     }
 
     def clean(self):
@@ -104,7 +115,11 @@ class EnhancedNewTaskForm(EnhancedTaskForm):
 class CompletionForm(forms.Form):
     """What the enhanced esteira asks when a task is done, to calibrate the next ones."""
 
-    actual_effort = forms.ChoiceField(label="Quanto levou de fato?", choices=EFFORT_CHOICES)
+    actual_effort = forms.ChoiceField(
+        label="Quanto tempo levou?",
+        choices=EFFORT_CHOICES,
+        error_messages={"required": "Escolha quanto tempo levou."},
+    )
     priority_verdict = forms.ChoiceField(
         label="A prioridade estava certa?",
         choices=Task.PriorityVerdict.choices,

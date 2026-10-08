@@ -35,6 +35,8 @@ S = Status
         (S.QUEUED, S.DISCARDED),
         (S.BLOCKED, S.DISCARDED),
         (S.PAUSED, S.DISCARDED),
+        # ...and a discard can be taken back, so it needs no "are you sure?".
+        (S.DISCARDED, S.QUEUED),
     ],
 )
 def test_enhanced_transitions(current, target):
@@ -51,7 +53,7 @@ def test_enhanced_transitions(current, target):
         (S.BLOCKED, S.DONE),
         (S.PAUSED, S.DONE),
         (S.DONE, S.QUEUED),
-        (S.DISCARDED, S.QUEUED),
+        (S.DISCARDED, S.RUNNING),
     ],
 )
 def test_enhanced_forbidden_transitions(current, target):

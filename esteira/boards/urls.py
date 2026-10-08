@@ -19,4 +19,5 @@ urlpatterns = [
     path("tarefas/<int:pk>/bloquear/", views.task_block, name="task-block"),
     path("tarefas/<int:pk>/desbloquear/", views.task_unblock, name="task-unblock"),
     path("tarefas/<int:pk>/descartar/", views.task_discard, name="task-discard"),
+    path("tarefas/<int:pk>/restaurar/", views.task_restore, name="task-restore"),
 ]
