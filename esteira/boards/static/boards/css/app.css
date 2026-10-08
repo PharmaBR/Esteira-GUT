@@ -452,6 +452,8 @@ textarea {
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   font: inherit;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .rating select {
@@ -581,7 +583,13 @@ button:disabled,
 .task-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0 18px;
+}
+
+/* An opened reason form drops to its own full-width row. */
+.task-actions .reason[open] {
+  flex-basis: 100%;
 }
 
 .done {
@@ -615,4 +623,214 @@ button:disabled,
   flex: none;
   font-family: var(--mono);
   font-size: 0.82rem;
+}
+
+/* ── Enhanced esteira ───────────────────────────────────────────── */
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 16px;
+}
+
+.section-aside {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Side by side where there is room; stacked on a phone. */
+.field-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.triage,
+.choices {
+  display: grid;
+  gap: 6px;
+}
+
+legend {
+  padding: 0;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.check input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary);
+}
+
+.completion {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1.5px solid var(--border);
+}
+
+.reason summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  color: var(--primary);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reason-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 8px;
+}
+
+.reason-form input {
+  flex: 1 1 180px;
+}
+
+.parked {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+}
+
+.reason-text {
+  color: var(--warn);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.reason-text::before {
+  content: "Motivo: ";
+  font-weight: 400;
+}
+
+.chip {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 0.12em;
+}
+
+.chip-crisis {
+  background: var(--danger);
+  color: var(--surface);
+}
+
+.task.crisis {
+  border-color: var(--danger);
+}
+
+.task.crisis .score {
+  background: var(--danger);
+  color: var(--surface);
+}
+
+.overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.gut abbr {
+  text-decoration: none;
+}
+
+/* ── Weekly review ──────────────────────────────────────────────── */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+
+.stat dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.stat dd {
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.stat small {
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.review-grid .card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.tally {
+  display: grid;
+  gap: 8px;
+}
+
+.tally li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  overflow-wrap: anywhere;
+}
+
+.tally strong {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.tally small {
+  display: block;
+  color: var(--muted);
 }

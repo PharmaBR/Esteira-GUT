@@ -85,6 +85,79 @@ def test_edit_form(client, classic, add_task):
     assert_no_silent_requests(client.get(reverse("task-edit", args=[task.pk]), **HTMX).content)
 
 
+@pytest.fixture
+def busy_enhanced(enhanced, add_task):
+    """An enhanced board showing every kind of card at once."""
+    now = timezone.now()
+    add_task(enhanced, "Crise", g=5, u=5, t=3, effort="s")
+    add_task(enhanced, "Na fila", effort="m", due_date=timezone.localdate())
+    add_task(enhanced, "Pausada", effort="s", status="paused", status_reason="interrupção")
+    add_task(enhanced, "Bloqueada", effort="s", status="blocked", status_reason="aguardando")
+    add_task(enhanced, "Feita", effort="s", status="done", completed_at=now)
+    add_task(enhanced, "Rodando", effort="s", status="running", started_at=now, running_since=now)
+    return enhanced
+
+
+def test_enhanced_board_with_every_state(client, busy_enhanced):
+    html = client.get(busy_enhanced.get_absolute_url()).content.decode()
+
+    for section in ("Pausadas", "Bloqueadas", "Crise", "Pausar", "Bloquear", "Descartar"):
+        assert section in html, f"fixture no longer renders {section!r}"
+    assert assert_no_silent_requests(html) >= 12
+
+
+def test_enhanced_board_with_an_empty_slot(client, enhanced, add_task):
+    add_task(enhanced, "Na fila", effort="m")
+
+    assert_no_silent_requests(client.get(enhanced.get_absolute_url()).content)
+
+
+def test_enhanced_board_after_a_rejected_action(client, busy_enhanced):
+    """Error responses are swapped in too, so they obey the same rule."""
+    response = client.post(reverse("pull-next", args=[busy_enhanced.pk]), **HTMX)
+
+    assert response.status_code == 409
+    assert_no_silent_requests(response.content)
+
+
+def test_enhanced_edit_form(client, enhanced, add_task):
+    task = add_task(enhanced, "Na fila", effort="m")
+
+    assert_no_silent_requests(client.get(reverse("task-edit", args=[task.pk]), **HTMX).content)
+
+
+def test_review_page_navigates_under_the_global_bar(client, busy_enhanced):
+    soup = BeautifulSoup(
+        client.get(reverse("review", args=[busy_enhanced.pk])).content, "html.parser"
+    )
+
+    assert soup.select_one("#progress")
+    assert requesting_elements(soup) == []  # plain links only; app.js covers page loads
+
+
+def test_every_template_with_an_htmx_request_is_exercised_here():
+    """A new partial that issues requests must be added to the screens rendered above."""
+    from pathlib import Path
+
+    import esteira.boards
+
+    templates = Path(esteira.boards.__file__).parent / "templates"
+    with_requests = {
+        path.name
+        for path in templates.rglob("*.html")
+        if any(f"{verb}=" in path.read_text() for verb in HX_VERBS)
+    }
+
+    assert with_requests == {
+        "_board.html",
+        "_running.html",
+        "_task.html",
+        "_task_edit.html",
+        "_parked.html",
+        "_reason_form.html",
+    }
+
+
 def test_the_check_itself_catches_a_silent_request():
     silent = '<form hx-post="/x/" hx-disabled-elt="find button"><button>Ir</button></form>'
 

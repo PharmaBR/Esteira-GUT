@@ -1,4 +1,21 @@
 <div class="help-body">
+  {% if board.is_enhanced %}
+  <p>Esta é a esteira aprimorada: a mesma matriz GUT, com as correções da auditoria.</p>
+  <dl class="anchors">
+    <dt>G · Gravidade e T · Tendência</dt>
+    <dd>Você escolhe, de 1 a 5, sem valor sugerido. Cada nível diz o que significa.</dd>
+    <dt>U · Urgência</dt>
+    <dd>Com prazo, é calculada todo dia: 5 se vence hoje, 4 em até 2 dias, 3 em até 7, 2 em até 14, 1 depois disso. Sem prazo, você escolhe.</dd>
+    <dt>Prioridade</dt>
+    <dd>G × U × T dividido pelo esforço (15 min = 1, 1 h = 2, meio período = 3, um dia = 5, mais que isso = 8), mais 2 pontos por semana completa de espera.</dd>
+    <dt>Crise</dt>
+    <dd>Gravidade 5 com urgência 5 passa na frente de tudo.</dd>
+    <dt>Empates</dt>
+    <dd>Vence o prazo mais próximo; depois, a tarefa mais antiga.</dd>
+  </dl>
+  <p>Só entra o que é importante e seu, até o teto de {{ board.queue_limit }} tarefas abertas. Só uma tarefa fica em execução: para sair dela sem concluir, pause (interrupção) ou bloqueie (depende de alguém), dizendo o motivo.</p>
+  <p>Compromissos com hora marcada, como aulas e reuniões, vão no calendário, não aqui.</p>
+  {% else %}
   <p>Dê a cada tarefa três notas de 1 a 5. A esteira multiplica as três e põe a maior nota no topo.</p>
   <dl class="anchors">
     <dt>G · Gravidade</dt>
@@ -9,4 +26,5 @@
     <dd>O quanto piora se ninguém agir. 1 = não muda · 5 = piora rapidamente.</dd>
   </dl>
   <p>Só uma tarefa fica em execução. Conclua-a (ou devolva à fila) antes de puxar a próxima.</p>
+  {% endif %}
 </div>

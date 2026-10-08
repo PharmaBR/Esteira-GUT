@@ -3,7 +3,7 @@
         hx-post="{% url 'task-edit' task.pk %}" hx-target="#board" hx-swap="outerHTML"
         hx-indicator="this" hx-disabled-elt="find button">
     {% csrf_token %}
-    {% include "boards/_task_fields.html" %}
+    {% include form.fields_template %}
     <div class="actions">
       <button type="submit" class="btn btn-primary">Salvar<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
       <a class="btn" href="{{ board.get_absolute_url }}"

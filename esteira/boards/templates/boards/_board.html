@@ -6,28 +6,11 @@
     <section aria-labelledby="h-running">
       <h2 id="h-running" class="eyebrow">Em execução</h2>
       {% if running %}
-      <article class="card running">
-        <h3 class="running-title">{{ running.title }}</h3>
-        {% include "boards/_task_meta.html" with task=running %}
-        <div class="actions">
-          <form method="post" action="{% url 'task-complete' running.pk %}"
-                hx-post="{% url 'task-complete' running.pk %}" hx-target="#board" hx-swap="outerHTML"
-                hx-indicator="this" hx-disabled-elt="find button">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary">Concluir<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
-          </form>
-          <form method="post" action="{% url 'task-return' running.pk %}"
-                hx-post="{% url 'task-return' running.pk %}" hx-target="#board" hx-swap="outerHTML"
-                hx-indicator="this" hx-disabled-elt="find button">
-            {% csrf_token %}
-            <button type="submit" class="btn">Devolver à fila<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
-          </form>
-        </div>
-      </article>
+      {% include "boards/_running.html" %}
       {% else %}
       <div class="card slot-empty">
-        {% if next_up %}
         <p class="slot-empty-title">Nada em execução.</p>
+        {% if next_up %}
         <form method="post" action="{% url 'pull-next' board.pk %}"
               hx-post="{% url 'pull-next' board.pk %}" hx-target="#board" hx-swap="outerHTML"
               hx-indicator="this" hx-disabled-elt="find button">
@@ -35,13 +18,25 @@
           <button type="submit" class="btn btn-primary btn-block">Puxar a próxima<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
         </form>
         <p class="hint">Próxima da fila: {{ next_up.task.title }}</p>
-        {% else %}
-        <p class="slot-empty-title">Nada em execução.</p>
+        {% elif not paused %}
         <p class="hint">Adicione uma tarefa para começar.</p>
         {% endif %}
+        {% if paused %}<p class="hint">Há tarefa pausada esperando para ser retomada.</p>{% endif %}
       </div>
       {% endif %}
     </section>
+
+    {% if paused %}
+    <section aria-labelledby="h-paused">
+      <h2 id="h-paused" class="eyebrow">Pausadas <span class="count">{{ paused|length }}</span></h2>
+      <ul class="queue">
+        {% for task in paused %}
+        {% url 'task-resume' task.pk as resume_url %}
+        {% include "boards/_parked.html" with back_url=resume_url back_label="Retomar" can_block=True priority=None %}
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
 
     <section aria-labelledby="h-new">
       <h2 id="h-new" class="eyebrow">Nova tarefa</h2>
@@ -49,7 +44,7 @@
             hx-post="{% url 'task-create' board.pk %}" hx-target="#board" hx-swap="outerHTML"
             hx-indicator="this" hx-disabled-elt="find button">
         {% csrf_token %}
-        {% include "boards/_task_fields.html" %}
+        {% include form.fields_template %}
         <button type="submit" class="btn btn-primary btn-block">Adicionar à fila<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
       </form>
     </section>
@@ -57,17 +52,34 @@
 
   <div class="col col-queue">
     <section aria-labelledby="h-queue">
-      <h2 id="h-queue" class="eyebrow">Fila{% if queue %} <span class="count">{{ queue|length }}</span>{% endif %}</h2>
+      <div class="section-head">
+        <h2 id="h-queue" class="eyebrow">Fila{% if queue %} <span class="count">{{ queue|length }}</span>{% endif %}</h2>
+        {% if board.is_enhanced %}
+        <p class="section-aside">{{ open_count }} de {{ board.queue_limit }} abertas · <a href="{% url 'review' board.pk %}">Revisão semanal</a></p>
+        {% endif %}
+      </div>
       {% if queue %}
       <ol class="queue">
         {% for item in queue %}
-        {% include "boards/_task.html" with task=item.task priority=item.priority position=forloop.counter %}
+        {% include "boards/_task.html" with task=item.task priority=item.priority %}
         {% endfor %}
       </ol>
       {% else %}
       <p class="empty">A fila está vazia.</p>
       {% endif %}
     </section>
+
+    {% if blocked %}
+    <section aria-labelledby="h-blocked">
+      <h2 id="h-blocked" class="eyebrow">Bloqueadas <span class="count">{{ blocked|length }}</span></h2>
+      <ul class="queue">
+        {% for task in blocked %}
+        {% url 'task-unblock' task.pk as unblock_url %}
+        {% include "boards/_parked.html" with back_url=unblock_url back_label="Desbloquear" can_block=False priority=None %}
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
 
     <details id="done" class="done" data-keep-open>
       <summary>Concluídas{% if done_count %} ({{ done_count }}){% endif %}</summary>

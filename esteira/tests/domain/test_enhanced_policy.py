@@ -230,4 +230,4 @@ def test_nothing_starves_the_oldest_task_beats_any_new_arrival():
     else:
         pytest.fail("the oldest task never reached the top")
 
-    assert weeks <= 52
+    assert weeks == 50  # 1/8 + 2 x 50 > 100, the best a non-crisis newcomer can score

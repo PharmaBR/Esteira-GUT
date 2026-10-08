@@ -27,6 +27,33 @@ def gut_score(gravity: int, urgency: int, trend: int) -> int:
     return gravity * urgency * trend
 
 
+# What each rating means. Concrete on purpose: a scale without anchors drifts to 3 or to 5.
+# The urgency anchors mirror DEADLINE_URGENCY below, so a guess and a date agree.
+ANCHORS = {
+    "gravity": {
+        1: "ninguém nota se não for feito",
+        2: "incômodo pequeno, fácil de reverter",
+        3: "prejuízo real, mas recuperável",
+        4: "prejuízo grande ou difícil de reverter",
+        5: "dano irreversível ou que atinge outras pessoas",
+    },
+    "urgency": {
+        1: "pode esperar mais de duas semanas",
+        2: "cabe nas próximas duas semanas",
+        3: "precisa sair nesta semana",
+        4: "precisa sair em um ou dois dias",
+        5: "precisa sair hoje",
+    },
+    "trend": {
+        1: "não piora com o tempo",
+        2: "piora devagar, ao longo de meses",
+        3: "piora em semanas",
+        4: "piora em dias",
+        5: "piora a cada hora",
+    },
+}
+
+
 class Effort(StrEnum):
     """T-shirt sizes for how long a task takes.
 

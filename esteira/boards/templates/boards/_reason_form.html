@@ -1,0 +1,12 @@
+{# A state change that must say why. Parameters: url, label, placeholder, kind, task. #}
+<details class="reason">
+  <summary>{{ label }}…</summary>
+  <form method="post" action="{{ url }}" class="reason-form"
+        hx-post="{{ url }}" hx-target="#board" hx-swap="outerHTML"
+        hx-indicator="this" hx-disabled-elt="find button">
+    {% csrf_token %}
+    <label class="sr-only" for="reason-{{ kind }}-{{ task.pk }}">Motivo</label>
+    <input type="text" name="reason" id="reason-{{ kind }}-{{ task.pk }}" maxlength="200" required autocomplete="off" placeholder="{{ placeholder }}">
+    <button type="submit" class="btn">{{ label }}<span class="spinner htmx-indicator" aria-hidden="true"></span></button>
+  </form>
+</details>
